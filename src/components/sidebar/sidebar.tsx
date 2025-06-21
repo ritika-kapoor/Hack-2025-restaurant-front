@@ -14,13 +14,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     <div className="text-lg font-semibold mb-6">Menu</div>
                     
                     {/* Home */}
-                    <Link href="/" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                    <Link href="/store" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
                         <Home className="w-5 h-5" />
                         <span>ホーム</span>
                     </Link>
 
                     {/* Product Registration */}
-                    <Link href="/products/register" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                    <Link href="/store/productRegister" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
                         <Package className="w-5 h-5" />
                         <span>商品登録</span>
                     </Link>

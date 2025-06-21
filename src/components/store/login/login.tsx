@@ -52,7 +52,7 @@ export default function StoreLogin() {
       // Dummy implementation for development
       if (data.email === DUMMY_USER.email && data.password === DUMMY_USER.password) {
         localStorage.setItem("store_token", DUMMY_USER.token);
-        window.location.href = "/store/dashboard";
+        window.location.href = "/store/";
       } else {
         throw new Error("Invalid credentials");
       }
