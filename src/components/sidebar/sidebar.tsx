@@ -26,7 +26,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     </Link>
 
                     {/* Order Management */}
-                    <Link href="/orders" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                    <Link href="/store/orders" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
                         <ShoppingCart className="w-5 h-5" />
                         <span>注文管理</span>
                     </Link>
@@ -38,7 +38,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     </Link>
 
                     {/* Notifications */}
-                    <Link href="/notifications" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                    <Link href="/store/notifications" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
                         <Bell className="w-5 h-5" />
                         <span>通知</span>
                     </Link>

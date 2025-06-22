@@ -1,6 +1,6 @@
-import Notification from "@/components/store/notification";
-import ReservedFood from "@/components/store/reservedFood";
-import ChartPieSimple from "@/components/store/soldFood";
+import AllRegisterdFood from "@/components/store/Products/AllRegisterdFood/allRegisterdFood";
+import ReservedFood from "@/components/store/reservedFood/reservedFood";
+import ChartPieSimple from "@/components/store/soldFood/soldFood";
 
 export default function Page() {
     return (
@@ -14,7 +14,7 @@ export default function Page() {
           </div>
         </div>
         <div className="mt-6">
-          <Notification />
+          <AllRegisterdFood/>
         </div>
       </div>
     );

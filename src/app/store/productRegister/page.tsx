@@ -1,4 +1,4 @@
-import ProductRegister from "@/components/store/productRegister/productRegister";
+import ProductRegister from "@/components/store/Products/productRegister/productRegister";
 
 export default function Page() {
   return (
