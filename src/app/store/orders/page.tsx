@@ -1,5 +1,10 @@
 import Orders from "@/components/store/orders/orders";
 
+/**Add commentMore actions
+ * Renders the order list page with a heading and the Orders component.
+ *
+ * Displays a heading labeled "注文一覧" (Order List) above the list of orders.
+ */
 export default function Page() {
   return (
     <div>
