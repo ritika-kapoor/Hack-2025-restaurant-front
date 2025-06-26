@@ -32,7 +32,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     </Link>
 
                     {/* Store Management */}
-                    <Link href="/store" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                    <Link href="/store/ManageStoreInfo" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
                         <Store className="w-5 h-5" />
                         <span>店舗情報管理</span>
                     </Link>
