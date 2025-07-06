@@ -73,6 +73,13 @@ export default function ProductRegister() {
       }
 
       setFlyerResponse(result.data);
+      // リダイレクト処理を追加
+      if (result.data && result.data.flyer_data && result.data.flyer_data.store && result.data.flyer_data.store.id) {
+        window.location.href = `/product_register/${result.data.flyer_data.store.id}`;
+      } else {
+        // store_idが取得できない場合は、エラーメッセージを表示するか、デフォルトのページにリダイレクト
+        setErrorMessage('店舗IDが取得できませんでした。');
+      }
     } catch (error: any) {
       setErrorMessage(error.message);
     } finally {
