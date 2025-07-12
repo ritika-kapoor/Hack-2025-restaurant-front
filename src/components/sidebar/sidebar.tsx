@@ -1,6 +1,7 @@
 import { Home, Package, ShoppingCart, Store, Bell, QrCode, LogOut } from "lucide-react"
 import Link from "next/link"
 
+
 type SidebarProps = {
     isOpen: boolean;
   };
@@ -47,6 +48,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     <Link href="/qr-scanner" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
                         <QrCode className="w-5 h-5" />
                         <span>QRコード読み取り</span>
+                    </Link>
+
+                    {/* 店舗情報修正 */}
+                    <Link href="/store/editShop" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                        <span>店舗情報修正</span>
                     </Link>
 
                     {/* Logout */}
