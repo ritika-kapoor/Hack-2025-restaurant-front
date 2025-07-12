@@ -1,3 +1,5 @@
+"use client";
+
 import { 
     CheckCircle,
     MessageCircle,
@@ -6,8 +8,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Notification() {
+
+  const router = useRouter();
   const notifications = [
     {
       id: 1,
@@ -38,7 +45,21 @@ export default function Notification() {
     }
   ];
 
+  useEffect(() => {
+    const token = localStorage.getItem("store_token");
+    if(!token) {
+      router.push("/login");
+    }
+  }, [router]);
+
+  const handleRemoveToken = () => {
+    localStorage.removeItem("store_token");
+    router.push("/login");
+  }
+
   return (
+    <div>
+      <Button onClick={() => handleRemoveToken()}>ログアウト</Button>
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl">お客様対応通知</CardTitle>
@@ -73,5 +94,6 @@ export default function Notification() {
         </ScrollArea>
       </CardContent>
     </Card>
+    </div>
   );
 }
