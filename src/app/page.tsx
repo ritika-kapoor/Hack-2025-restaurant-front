@@ -1,9 +1,81 @@
+"use client";
 import Image from "next/image";
+import { useEffect } from "react";
 
 export default function Home() {
+  const publicVapidKey = "BNCeYBXGZPLsE8vPl-WZ4fi-wqIYNs35WsF2uqL1iTRamcwnd4fVxdyDEatst9UrlCjC2Zd1js8QsfFL8MriUvQ";
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then((registration) => {
+          console.log("Service Worker registered with scope:", registration.scope);
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
+    }
+  }, []);
+
+  const subscribeToPush = async () => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      console.warn("Push messaging is not supported");
+      return;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
+      });
+
+      console.log("Push Subscription:", JSON.stringify(subscription));
+      
+      const subscriptionData = subscription.toJSON();
+      const payload = {
+        endpoint: subscriptionData.endpoint,
+        p256dh: subscriptionData.keys.p256dh,
+        auth: subscriptionData.keys.auth,
+      };
+
+      await fetch("http://localhost:8080/api/v1/notifications/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      alert("Push notifications enabled!");
+    } catch (error) {
+      console.error("Failed to subscribe to push:", error);
+      alert("Failed to enable push notifications.");
+    }
+  };
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, "+")
+      .replace(/_/g, "/");
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <button onClick={subscribeToPush} className="px-4 py-2 bg-blue-500 text-white rounded-md">
+          Enable Push Notifications
+        </button>
         <Image
           className="dark:invert"
           src="/next.svg"
