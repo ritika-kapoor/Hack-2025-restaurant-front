@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 const registerSchema = z.object({
   name: z.string().min(1, "店舗名は必須です"),
   email: z.string().email("有効なメールアドレスを入力してください"),
@@ -22,13 +23,13 @@ const registerSchema = z.object({
 type RegisterForm = z.infer<typeof registerSchema>;
 
 // Dummy data for testing
-const DUMMY_RESPONSE = {
-  success: true,
-  message: "登録確認メールを送信しました。メールをご確認ください。",
-  data: {
-    token: "dummy.jwt.token"
-  }
-};
+// const DUMMY_RESPONSE = {
+//   success: true,
+//   message: "登録確認メールを送信しました。メールをご確認ください。",
+//   data: {
+//     token: "dummy.jwt.token"
+//   }
+// };
 
 /*
 API Implementation Notes:
@@ -67,39 +68,38 @@ export default function StoreRegister() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const router = useRouter();
 
-  const onSubmit = async (data: RegisterForm) => {
-    setError("");
-    try {
-      console.log("送信データ:", data);
-      // Simulate API call with dummy data
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-      const response = DUMMY_RESPONSE;
-      
-      // In real implementation, store JWT token in localStorage or secure cookie
-      if (response.data?.token) {
-        localStorage.setItem('store_token', response.data.token);
-      }
-      
-      setSuccessMessage(response.message);
-      setSuccess(true);
-    } catch (err: any) {
-      setError("登録に失敗しました");
+ const onSubmit = async (data: RegisterForm) => {
+  setError("");
+  try {
+    console.log("送信データ:", data);
+
+    const payload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      phone_number: data.phone_number,
+      zipcode: data.address_zipcode,
+      prefecture: data.address_prefecture,
+      city: data.address_city,
+      street: data.address_street,
+    };
+
+    const response = await axios.post("http://localhost:8080/api/v1/stores/signup", payload);
+
+    if (response.data?.data?.token) {
+      localStorage.setItem("store_token", response.data.data.token);
     }
-  };
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md p-6 text-center">
-          <CardContent>
-            <h2 className="text-xl font-bold mb-2">仮登録完了</h2>
-            <p className="text-sm">{successMessage}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    setSuccessMessage(response.data.message);
+    setSuccess(true);
+    router.push("/store/");
+  } catch (err: any) {
+    console.error("登録エラー:", err.response?.data);
+    setError("登録に失敗しました");
   }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center">
