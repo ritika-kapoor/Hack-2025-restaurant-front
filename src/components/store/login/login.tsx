@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "有効なメールアドレスを入力してください" }),
@@ -17,12 +18,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-// Dummy user data for development
-const DUMMY_USER = {
-  email: "store@example.com",
-  password: "password123",
-  token: "dummy.jwt.token"
-};
+
 
 export default function StoreLogin() {
   const {
@@ -33,33 +29,19 @@ export default function StoreLogin() {
     resolver: zodResolver(loginSchema),
   });
 
+  const router = useRouter();
   const [error, setError] = useState("");
 
   const onSubmit = async (data: LoginForm) => {
-    setError("");
     try {
-      // Real JWT implementation (commented out for now)
-      /*
-      const response = await axios.post("/api/store/login", data, {
-        headers: {
-          "Content-Type": "application/json",
-        }
-      });
-      const { token } = response.data;
-      localStorage.setItem("store_token", token);
-      */
-
-      // Dummy implementation for development
-      if (data.email === DUMMY_USER.email && data.password === DUMMY_USER.password) {
-        localStorage.setItem("store_token", DUMMY_USER.token);
-        window.location.href = "/store/";
-      } else {
-        throw new Error("Invalid credentials");
-      }
-    } catch (err: any) {
+      const response = await axios.post("http://localhost:8080/api/v1/stores/signin", data);
+      localStorage.setItem("store_token", response.data.token);
+      router.push("/store/");
+    }catch (error) {
       setError("ログインに失敗しました");
+      console.error(error);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
