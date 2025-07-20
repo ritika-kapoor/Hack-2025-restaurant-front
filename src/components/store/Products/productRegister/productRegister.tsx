@@ -14,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import IsLoginOrNot from "@/components/isLoginOrNot/isLoginOrNot";
 
 const registerSchema = z.object({
     store_id: z.string(),
@@ -86,6 +87,7 @@ export default function ProductRegister() {
 
     return (
         <div className="min-h-screen flex items-center justify-center">
+            <IsLoginOrNot/>
             <Card className="w-full max-w-md p-6">
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
