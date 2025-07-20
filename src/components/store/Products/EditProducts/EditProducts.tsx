@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import axios from "axios";
 import { useEffect } from "react";
+import IsLoginOrNot from "@/components/isLoginOrNot/isLoginOrNot";
 
 const EditProductSchema = z.object({
     id: z.number(),
@@ -72,6 +73,7 @@ export default function EditProducts() {
 
     return (
         <div>
+            <IsLoginOrNot/>
             <Card>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

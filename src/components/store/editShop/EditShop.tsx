@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import IsLoginOrNot from "@/components/isLoginOrNot/isLoginOrNot";
 
 const registerSchema = z.object({
   name: z.string().min(1, "店舗名は必須です"),
@@ -42,6 +43,8 @@ export default function EditShop() {
       try {
         const response = await axios.get("/api/mockStore");
         const store = response.data[0];
+        
+        // おそらくバックエンドからjwtのトークンを受け取るからそれを今はローカルストレージに保存しておく。
 
         setValue("name", store.name);
         setValue("email", store.email);
@@ -64,7 +67,13 @@ export default function EditShop() {
     setError("");
     setSuccessMessage("");
     try {
-      const response = await axios.post("/api/mockStore", data);
+      // 本番はバックエンドにデータを送る時、ヘッダーにトークンを入れて送る。
+      const response = await axios.post("/api/mockStore", data,{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("store_token")}`
+        }
+      });
+      console.log(response)
       if (response.status === 200) {
         setSuccessMessage("店舗情報を更新しました");
       } else {
@@ -78,6 +87,7 @@ export default function EditShop() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
+      <IsLoginOrNot/>
       <Card className="w-full max-w-md p-6">
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -9,12 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import IsLoginOrNot from "@/components/isLoginOrNot/isLoginOrNot"
 
 export default function Notification() {
 
+  // 今は仮のトークンをセットする
+  // localStorage.setItem("store_token", "123")
+
+  // console.log(localStorage.getItem("store_token"))
+
+  
   const router = useRouter();
+  
   const notifications = [
     {
       id: 1,
@@ -44,14 +51,7 @@ export default function Notification() {
       badgeColor: 'bg-yellow-100 text-yellow-800'
     }
   ];
-
-  useEffect(() => {
-    const token = localStorage.getItem("store_token");
-    if(!token) {
-      router.push("/login");
-    }
-  }, [router]);
-
+  
   const handleRemoveToken = () => {
     localStorage.removeItem("store_token");
     router.push("/login");
@@ -59,6 +59,7 @@ export default function Notification() {
 
   return (
     <div>
+      <IsLoginOrNot />
       <Button onClick={() => handleRemoveToken()}>ログアウト</Button>
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
