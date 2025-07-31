@@ -1,4 +1,4 @@
-import { Home, Package, Store, LogOut } from "lucide-react";
+import { Home, Package, Store, LogOut, File } from "lucide-react";
 import Link from "next/link";
 import Logout from "../logOut/logOut";
 
@@ -43,6 +43,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           >
             <Store className="w-5 h-5" />
             <span>店舗情報管理</span>
+          </Link>
+
+          <Link href="/store/flyer" className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+            <File className="w-5 h-5"/>
+            <span>チラシ設定</span>
           </Link>
 
           {/* 時期に追加するかも */}
