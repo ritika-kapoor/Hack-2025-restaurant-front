@@ -73,7 +73,7 @@ export default function EditProducts() {
 
     return (
         <div>
-            <IsLoginOrNot/>
+            {/* <IsLoginOrNot/> */}
             <Card>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
