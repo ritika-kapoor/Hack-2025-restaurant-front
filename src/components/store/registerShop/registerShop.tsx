@@ -77,16 +77,12 @@ export default function StoreRegister() {
 
     const payload = {
       name: data.name,
-      email: data.email,
-      password: data.password,
-      phone_number: data.phone_number,
-      zipcode: data.address_zipcode,
       prefecture: data.address_prefecture,
       city: data.address_city,
       street: data.address_street,
     };
 
-    const response = await axios.post("http://localhost:8080/api/v1/stores/signup", payload);
+    const response = await axios.post("http://localhost:8080/api/v1/stores", payload);
 
     if (response.data?.data?.token) {
       localStorage.setItem("store_token", response.data.data.token);

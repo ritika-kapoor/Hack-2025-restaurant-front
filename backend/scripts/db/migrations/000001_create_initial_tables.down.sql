@@ -1,8 +1,0 @@
-DROP TABLE IF EXISTS flyer_items;
-DROP TABLE IF EXISTS campaign_stores;
-DROP TABLE IF EXISTS products;
-DROP TABLE IF EXISTS campaigns;
-DROP TABLE IF EXISTS flyers;
-DROP TABLE IF EXISTS stores;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS push_subscriptions;
