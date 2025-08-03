@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Store, MapPin, FileImage, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Store, MapPin, FileImage, Loader2, CheckCircle, AlertCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -30,6 +30,7 @@ export default function EditShop() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<EditStoreForm>({
     resolver: zodResolver(editStoreSchema),
@@ -38,7 +39,51 @@ export default function EditShop() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [addressError, setAddressError] = useState("");
   const { isAuthenticated } = useAuth();
+
+  // 郵便番号を監視
+  const zipcode = watch("zipcode");
+
+  // 郵便番号から住所を検索
+  useEffect(() => {
+    const searchAddress = async () => {
+      // 郵便番号が7桁の数字でない場合は処理しない
+      if (!zipcode || !/^\d{7}$/.test(zipcode)) {
+        setAddressError("");
+        return;
+      }
+
+      setIsSearchingAddress(true);
+      setAddressError("");
+
+      try {
+        const response = await axios.get(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zipcode}`);
+        
+        if (response.data.status === 200 && response.data.results && response.data.results.length > 0) {
+          const result = response.data.results[0];
+          
+          // 住所情報をフォームに設定
+          setValue("prefecture", result.address1);
+          setValue("city", result.address2);
+          setValue("street", result.address3);
+          
+        } else {
+          setAddressError("該当する住所が見つかりませんでした");
+        }
+      } catch (err) {
+        console.error("住所検索エラー:", err);
+        setAddressError("住所の検索に失敗しました");
+      } finally {
+        setIsSearchingAddress(false);
+      }
+    };
+
+    // デバウンス処理（500ms待ってから実行）
+    const timeoutId = setTimeout(searchAddress, 500);
+    return () => clearTimeout(timeoutId);
+  }, [zipcode, setValue]);
 
   // 店舗情報取得
   useEffect(() => {
@@ -177,13 +222,30 @@ export default function EditShop() {
                     
                     <div>
                       <Label htmlFor="zipcode" className="text-gray-700 font-medium">郵便番号</Label>
-                      <Input 
-                        id="zipcode" 
-                        {...register("zipcode")} 
-                        className="mt-1 meguru-input"
-                        placeholder="1234567"
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="zipcode" 
+                          {...register("zipcode")} 
+                          className="mt-1 meguru-input pr-10"
+                          placeholder="1234567（ハイフンなし7桁）"
+                          maxLength={7}
+                        />
+                        {isSearchingAddress && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+                          </div>
+                        )}
+                        {!isSearchingAddress && zipcode && zipcode.length === 7 && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <Search className="w-4 h-4 text-green-600" />
+                          </div>
+                        )}
+                      </div>
                       {errors.zipcode && <p className="text-sm text-red-500 mt-1">{errors.zipcode.message}</p>}
+                      {addressError && <p className="text-sm text-red-500 mt-1">{addressError}</p>}
+                      {!addressError && zipcode && zipcode.length === 7 && !isSearchingAddress && (
+                        <p className="text-sm text-green-600 mt-1">✓ 住所を自動入力しました</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -193,6 +255,9 @@ export default function EditShop() {
                   <div className="flex items-center space-x-2 pb-4 border-b border-orange-100">
                     <MapPin className="w-5 h-5 text-orange-600" />
                     <h2 className="text-lg font-semibold text-gray-800">店舗所在地</h2>
+                    {!addressError && zipcode && zipcode.length === 7 && !isSearchingAddress && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">自動入力済み</span>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -294,6 +359,7 @@ export default function EditShop() {
             <CardContent className="p-6">
               <h3 className="font-semibold text-gray-800 mb-3">💡 ヒント</h3>
               <div className="space-y-3 text-sm text-gray-600">
+                <p>• 郵便番号（7桁）を入力すると住所が自動で入力されます</p>
                 <p>• 正確な住所情報は、お客様がお店を見つけやすくします</p>
                 <p>• 電話番号を登録すると、お客様からのお問い合わせを受けられます</p>
                 <p>• チラシ機能を使って、セール情報を効果的にPRしましょう</p>
