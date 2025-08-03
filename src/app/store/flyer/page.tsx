@@ -3,6 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  FileImage, 
+  Upload, 
+  Loader2, 
+  CheckCircle, 
+  AlertCircle, 
+  Camera, 
+  Sparkles, 
+  Store,
+  Eye,
+  RefreshCw,
+  ArrowRight
+} from 'lucide-react';
 
 // Define the structure of the response data from the backend
 interface FlyerResponse {
@@ -146,104 +163,283 @@ export default function ProductRegister() {
   // 認証状態をチェック
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg">読み込み中...</div>
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-600 mb-4" />
+            <p className="text-gray-600">認証状態を確認中...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen">
-        <div className="text-lg text-red-500 mb-4">ログインが必要です</div>
-        <a href="/login" className="text-blue-500 hover:underline">
-          ログインページへ
-        </a>
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">ログインが必要です</h2>
+            <p className="text-gray-600 mb-6">チラシ登録機能をご利用いただくには、ログインしてください。</p>
+            <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
+              <a href="/login">ログインページへ</a>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">チラシで店舗情報を更新</h1>
-      <p className="text-gray-600 mb-6">
-        チラシをアップロードすると、AI分析により店舗情報が自動的に更新されます。
-      </p>
-
-      {/* 既存チラシがある場合の動線 */}
-      {checkingExistingFlyer && (
-        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-6">
-          <div className="flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></div>
-            <span className="text-gray-600">既存チラシを確認中...</span>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* ヘッダー */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full mb-4 shadow-lg">
+            <Sparkles className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">AI チラシ分析</h1>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            チラシをアップロードすると、AI分析により店舗情報と商品が自動的に更新されます
+          </p>
         </div>
-      )}
 
-      {existingFlyer && !checkingExistingFlyer && (
-        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-blue-800 mb-2">📄 既存のチラシがあります</h3>
-              <div className="text-sm text-blue-700 space-y-1">
-                <p><strong>店舗名:</strong> {existingFlyer.flyer_data.store.name}</p>
-                {existingFlyer.flyer_data.campaign.name && (
-                  <p><strong>キャンペーン:</strong> {existingFlyer.flyer_data.campaign.name}</p>
-                )}
-                <p><strong>登録日:</strong> {new Date(existingFlyer.created_at).toLocaleDateString('ja-JP')}</p>
+        {/* 既存チラシ確認中 */}
+        {checkingExistingFlyer && (
+          <Card className="mb-6 border-orange-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-center space-x-3">
+                <Loader2 className="w-5 h-5 animate-spin text-orange-600" />
+                <span className="text-gray-600">既存チラシを確認中...</span>
               </div>
-            </div>
-            <a
-              href={`/store/flyer/${currentStoreId}`}
-              className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm font-medium"
-            >
-              チラシ詳細を見る
-            </a>
-          </div>
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="mb-4">
-          <label htmlFor="flyer_image" className="block text-sm font-medium text-gray-700">
-            チラシ画像
-          </label>
-          <input
-            type="file"
-            id="flyer_image"
-            name="flyer_image"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-          />
-        </div>
-
-        {previewUrl && (
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">プレビュー</h2>
-            <img src={previewUrl} alt="Preview" className="max-w-full h-auto border rounded-lg" />
-          </div>
+            </CardContent>
+          </Card>
         )}
 
-        <button
-          type="submit"
-          disabled={isUploading}
-          className="px-4 py-2 bg-orange-500 text-white rounded-md disabled:bg-gray-400 hover:bg-orange-600"
-        >
-          {isUploading ? 'AI分析中...' : '店舗情報を更新'}
-        </button>
-        {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
-      </form>
+        {/* 既存チラシがある場合 */}
+        {existingFlyer && !checkingExistingFlyer && (
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-2 text-blue-800">
+                <FileImage className="w-5 h-5" />
+                <span>既存のチラシがあります</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-blue-700">店舗名:</span>
+                    <p className="text-blue-600">{existingFlyer.flyer_data.store.name}</p>
+                  </div>
+                  {existingFlyer.flyer_data.campaign.name && (
+                    <div>
+                      <span className="font-medium text-blue-700">キャンペーン:</span>
+                      <p className="text-blue-600">{existingFlyer.flyer_data.campaign.name}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-blue-700">登録日:</span>
+                    <p className="text-blue-600">{new Date(existingFlyer.created_at).toLocaleDateString('ja-JP')}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-blue-700">商品数:</span>
+                    <p className="text-blue-600">{existingFlyer.flyer_data.flyer_items.length}商品</p>
+                  </div>
+                </div>
+                <Button asChild variant="outline" className="w-full sm:w-auto border-blue-300 text-blue-700 hover:bg-blue-100">
+                  <a href={`/store/flyer/${currentStoreId}`} className="flex items-center justify-center space-x-2">
+                    <Eye className="w-4 h-4" />
+                    <span>チラシ詳細を見る</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {flyerResponse && (
-        <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-          <h2 className="text-xl font-semibold mb-2 text-green-800">✅ 店舗情報が更新されました</h2>
-          <div className="text-sm text-green-700">
-            <p><strong>店舗名:</strong> {flyerResponse.flyer_data.store.name}</p>
-            <p><strong>住所:</strong> {flyerResponse.flyer_data.store.prefecture} {flyerResponse.flyer_data.store.city} {flyerResponse.flyer_data.store.street}</p>
-          </div>
-        </div>
-      )}
+        {/* チラシアップロードフォーム */}
+        <Card className="mb-6 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center space-x-2">
+              <Camera className="w-5 h-5" />
+              <span>新しいチラシをアップロード</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* ファイル選択エリア */}
+              <div className="space-y-2">
+                <Label htmlFor="flyer_image" className="text-gray-700 font-medium">
+                  チラシ画像を選択
+                </Label>
+                <div className="relative">
+                  <Input
+                    type="file"
+                    id="flyer_image"
+                    name="flyer_image"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  />
+                  {!selectedFile && (
+                    <div className="mt-4 p-8 border-2 border-dashed border-orange-300 rounded-xl bg-orange-50 text-center">
+                      <Upload className="w-12 h-12 text-orange-400 mx-auto mb-3" />
+                      <p className="text-orange-600 font-medium">画像をドラッグ＆ドロップ</p>
+                      <p className="text-orange-500 text-sm">または上のボタンから選択してください</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* プレビュー */}
+              {previewUrl && (
+                <div className="space-y-3">
+                  <Label className="text-gray-700 font-medium">プレビュー</Label>
+                  <div className="relative rounded-xl overflow-hidden border-2 border-orange-200 bg-white shadow-sm">
+                    <img 
+                      src={previewUrl} 
+                      alt="チラシプレビュー" 
+                      className="w-full h-auto max-h-96 object-contain"
+                    />
+                    <div className="absolute top-3 right-3">
+                      <div className="bg-white rounded-full p-2 shadow-md">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* エラーメッセージ */}
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-red-700 text-sm">{errorMessage}</p>
+                </div>
+              )}
+
+              {/* 送信ボタン */}
+              <Button
+                type="submit"
+                disabled={isUploading || !selectedFile}
+                className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg disabled:from-gray-400 disabled:to-gray-400"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    AI分析中...しばらくお待ちください
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    AI分析で店舗情報を更新
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* 成功時の表示 */}
+        {flyerResponse && (
+          <Card className="border-green-200 bg-green-50 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
+              <CardTitle className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5" />
+                <span>✨ 分析完了！店舗情報が更新されました</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* 店舗情報 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-green-800 flex items-center space-x-2">
+                      <Store className="w-4 h-4" />
+                      <span>更新された店舗情報</span>
+                    </h3>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>店舗名:</strong> {flyerResponse.flyer_data.store.name}</p>
+                      <p><strong>住所:</strong> {flyerResponse.flyer_data.store.prefecture} {flyerResponse.flyer_data.store.city} {flyerResponse.flyer_data.store.street}</p>
+                    </div>
+                  </div>
+                  
+                  {flyerResponse.flyer_data.campaign.name && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-green-800">キャンペーン情報</h3>
+                      <div className="space-y-1 text-sm">
+                        <p><strong>キャンペーン名:</strong> {flyerResponse.flyer_data.campaign.name}</p>
+                        {flyerResponse.flyer_data.campaign.start_date && (
+                          <p><strong>期間:</strong> {flyerResponse.flyer_data.campaign.start_date} 〜 {flyerResponse.flyer_data.campaign.end_date}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-green-800">商品情報</h3>
+                  <p className="text-sm text-green-700">
+                    {flyerResponse.flyer_data.flyer_items.length}商品が自動登録されました
+                  </p>
+                </div>
+
+                {/* アクションボタン */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button asChild className="flex-1 bg-green-600 hover:bg-green-700">
+                    <a href={`/store/flyer/${flyerResponse.store_id}`} className="flex items-center justify-center space-x-2">
+                      <Eye className="w-4 h-4" />
+                      <span>チラシ詳細を見る</span>
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" className="flex-1 border-green-600 text-green-700 hover:bg-green-50">
+                    <a href="/store/editShop" className="flex items-center justify-center space-x-2">
+                      <Store className="w-4 h-4" />
+                      <span>店舗情報を編集</span>
+                    </a>
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setFlyerResponse(null);
+                      setSelectedFile(null);
+                      setPreviewUrl(null);
+                      setErrorMessage('');
+                    }}
+                    variant="outline" 
+                    className="flex-1 border-orange-600 text-orange-700 hover:bg-orange-50"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    新しいチラシを登録
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 使い方のヒント */}
+        {!flyerResponse && (
+          <Card className="mt-8 bg-orange-50 border-orange-200">
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-orange-800 mb-3 flex items-center space-x-2">
+                <FileImage className="w-5 h-5" />
+                <span>💡 使い方のコツ</span>
+              </h3>
+              <div className="space-y-2 text-sm text-orange-700">
+                <p>• 商品名や価格がはっきり写っているチラシが最適です</p>
+                <p>• 店舗名や住所が記載されている場合、自動で更新されます</p>
+                <p>• JPG、PNG形式の画像ファイルをご使用ください</p>
+                <p>• 分析には数秒〜数十秒かかる場合があります</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
