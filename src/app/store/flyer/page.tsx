@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
 
@@ -42,6 +42,48 @@ export default function ProductRegister() {
   const [isUploading, setIsUploading] = useState(false);
   const [flyerResponse, setFlyerResponse] = useState<FlyerResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [existingFlyer, setExistingFlyer] = useState<FlyerResponse | null>(null);
+  const [checkingExistingFlyer, setCheckingExistingFlyer] = useState(false);
+  const [currentStoreId, setCurrentStoreId] = useState<string | null>(null);
+
+  // ページロード時に既存チラシをチェック
+  useEffect(() => {
+    const checkExistingFlyer = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        setCheckingExistingFlyer(true);
+        const token = localStorage.getItem('store_token');
+        if (!token) return;
+
+        // まず現在の店舗IDを取得
+        const profileResponse = await axios.get('http://localhost:8080/api/v1/stores/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const storeId = profileResponse.data.data.id;
+        setCurrentStoreId(storeId);
+
+        // 既存チラシをチェック
+        const flyerResponse = await axios.get(`http://localhost:8080/api/v1/flyer/${storeId}`);
+        
+        if (flyerResponse.data.data) {
+          setExistingFlyer(flyerResponse.data.data);
+        }
+      } catch (error: any) {
+        // 404の場合は既存チラシがないということなので、エラーにしない
+        if (error.response?.status !== 404) {
+          console.error('Failed to check existing flyer:', error);
+        }
+      } finally {
+        setCheckingExistingFlyer(false);
+      }
+    };
+
+    checkExistingFlyer();
+  }, [isAuthenticated]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -88,8 +130,11 @@ export default function ProductRegister() {
 
       setFlyerResponse(response.data.data);
       
-      // 店舗編集ページへリダイレクト
-      window.location.href = `/store/editShop`;
+      // 成功後に既存チラシ情報を更新
+      setExistingFlyer(response.data.data);
+      
+      // 成功メッセージをUIで表示（alertは削除）
+      // 自動リダイレクトは削除し、ユーザーが選択できるようにする
     } catch (error: any) {
       console.error('Upload error:', error);
       setErrorMessage(error.response?.data?.error || error.message || 'アップロードに失敗しました');
@@ -124,6 +169,39 @@ export default function ProductRegister() {
       <p className="text-gray-600 mb-6">
         チラシをアップロードすると、AI分析により店舗情報が自動的に更新されます。
       </p>
+
+      {/* 既存チラシがある場合の動線 */}
+      {checkingExistingFlyer && (
+        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-6">
+          <div className="flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></div>
+            <span className="text-gray-600">既存チラシを確認中...</span>
+          </div>
+        </div>
+      )}
+
+      {existingFlyer && !checkingExistingFlyer && (
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-800 mb-2">📄 既存のチラシがあります</h3>
+              <div className="text-sm text-blue-700 space-y-1">
+                <p><strong>店舗名:</strong> {existingFlyer.flyer_data.store.name}</p>
+                {existingFlyer.flyer_data.campaign.name && (
+                  <p><strong>キャンペーン:</strong> {existingFlyer.flyer_data.campaign.name}</p>
+                )}
+                <p><strong>登録日:</strong> {new Date(existingFlyer.created_at).toLocaleDateString('ja-JP')}</p>
+              </div>
+            </div>
+            <a
+              href={`/store/flyer/${currentStoreId}`}
+              className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm font-medium"
+            >
+              チラシ詳細を見る
+            </a>
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="mb-8">
         <div className="mb-4">
