@@ -10,7 +10,7 @@ export default function Header() {
           <div className="flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-sm">
             <Store className="w-5 h-5 text-orange-600" />
           </div>
-          <h1 className="text-xl font-bold text-white">めぐる店舗管理</h1>
+          <h1 className="text-xl font-bold text-white">meguru店舗管理</h1>
         </div>
       </div>
     </header>

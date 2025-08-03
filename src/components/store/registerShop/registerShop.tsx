@@ -165,7 +165,7 @@ export default function StoreRegister() {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">新規店舗登録</h2>
-          <p className="text-orange-100 text-sm">めぐるで地域とつながりましょう</p>
+          <p className="text-orange-100 text-sm">meguruで地域とつながりましょう</p>
         </div>
 
         <CardContent className="p-8">

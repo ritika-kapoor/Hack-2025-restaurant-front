@@ -59,7 +59,7 @@ export default function StoreLogin() {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">店舗ログイン</h2>
-          <p className="text-orange-100 text-sm">めぐるにおかえりなさい</p>
+          <p className="text-orange-100 text-sm">meguruにおかえりなさい</p>
         </div>
 
         <CardContent className="p-8">
