@@ -93,6 +93,12 @@ export default function EditProducts() {
             image_url: "",
             status: "在庫あり",
         });
+        
+        // ページの一番上にスクロール
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     };
 
     // 編集フォームを表示
@@ -106,6 +112,12 @@ export default function EditProducts() {
             quantity: product.quantity,
             image_url: product.image_url,
             status: product.status as "在庫あり" | "在庫なし",
+        });
+        
+        // ページの一番上にスクロール
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
     };
 
