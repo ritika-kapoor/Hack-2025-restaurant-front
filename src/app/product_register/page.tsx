@@ -1,15 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import axios from 'axios';
 
 // Define the structure of the response data from the backend
 interface FlyerResponse {
   id: string;
+  store_id: string;
   image_data: string; // base64 encoded image
   flyer_data: {
     store: {
       name: string;
-      address: string;
+      prefecture: string;
+      city: string;
+      street: string;
     };
     campaign: {
       name: string;
@@ -31,6 +36,7 @@ interface FlyerResponse {
 }
 
 export default function ProductRegister() {
+  const { isAuthenticated, isLoading } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -48,6 +54,12 @@ export default function ProductRegister() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!isAuthenticated) {
+      setErrorMessage('ログインが必要です');
+      return;
+    }
+
     if (!selectedFile) {
       setErrorMessage('画像を選択してください');
       return;
@@ -61,35 +73,67 @@ export default function ProductRegister() {
     formData.append('flyer_image', selectedFile);
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/flyer/upload', {
-        method: 'POST',
-        body: formData,
+      // localStorageからトークンを取得（必須）- EditShopと同じキーを使用
+      const token = localStorage.getItem('store_token');
+      console.log('Token from localStorage:', token); // デバッグログ
+      
+      if (!token) {
+        throw new Error('認証トークンが見つかりません。再ログインしてください。');
+      }
+
+      console.log('Sending request with Authorization header:', `Bearer ${token}`); // デバッグログ
+
+      // EditShopと同じようにaxiosを使用（FormDataの場合はContent-Type自動設定）
+      const response = await axios.post('http://localhost:8080/api/v1/flyer/upload', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
-      const result = await response.json();
+      console.log('Response status:', response.status); // デバッグログ
 
-      if (!response.ok) {
-        throw new Error(result.error || 'アップロードに失敗しました');
-      }
-
-      setFlyerResponse(result.data);
-      // リダイレクト処理を追加
-      if (result.data && result.data.flyer_data && result.data.flyer_data.store && result.data.flyer_data.store.id) {
-        window.location.href = `/product_register/${result.data.flyer_data.store.id}`;
-      } else {
-        // store_idが取得できない場合は、エラーメッセージを表示するか、デフォルトのページにリダイレクト
-        setErrorMessage('店舗IDが取得できませんでした。');
-      }
+      setFlyerResponse(response.data.data);
+      
+      // 店舗情報更新の成功メッセージ
+      alert('店舗情報が正常に更新されました！');
+      
+      // 店舗編集ページへリダイレクト
+      window.location.href = `/store/editShop`;
     } catch (error: any) {
-      setErrorMessage(error.message);
+      console.error('Upload error:', error); // デバッグログ
+      setErrorMessage(error.response?.data?.error || error.message || 'アップロードに失敗しました');
     } finally {
       setIsUploading(false);
     }
   };
 
+  // 認証状態をチェック
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg">読み込み中...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen">
+        <div className="text-lg text-red-500 mb-4">ログインが必要です</div>
+        <a href="/login" className="text-blue-500 hover:underline">
+          ログインページへ
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">チラシ登録</h1>
+      <h1 className="text-2xl font-bold mb-4">チラシで店舗情報を更新</h1>
+      <p className="text-gray-600 mb-6">
+        チラシをアップロードすると、AI分析により店舗情報が自動的に更新されます。
+      </p>
+      
       <form onSubmit={handleSubmit} className="mb-8">
         <div className="mb-4">
           <label htmlFor="flyer_image" className="block text-sm font-medium text-gray-700">
@@ -115,53 +159,19 @@ export default function ProductRegister() {
         <button
           type="submit"
           disabled={isUploading}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400"
+          className="px-4 py-2 bg-orange-500 text-white rounded-md disabled:bg-gray-400 hover:bg-orange-600"
         >
-          {isUploading ? 'アップロード中...' : '登録'}
+          {isUploading ? 'AI分析中...' : '店舗情報を更新'}
         </button>
         {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
       </form>
 
       {flyerResponse && (
-        <div className="mt-8 p-4 border rounded-lg bg-gray-50">
-          <h2 className="text-2xl font-bold mb-4 text-green-600">登録完了</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">登録された画像</h3>
-              <img 
-                src={`data:image/png;base64,${flyerResponse.image_data}`} 
-                alt="Registered Flyer" 
-                className="max-w-full h-auto border rounded-lg"
-              />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">抽出情報</h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-bold">店舗情報</h4>
-                  <p>名前: {flyerResponse.flyer_data.store.name}</p>
-                  <p>住所: {flyerResponse.flyer_data.store.address}</p>
-                </div>
-                <div>
-                  <h4 className="font-bold">キャンペーン情報</h4>
-                  <p>名前: {flyerResponse.flyer_data.campaign.name}</p>
-                  <p>期間: {flyerResponse.flyer_data.campaign.start_date} ~ {flyerResponse.flyer_data.campaign.end_date}</p>
-                </div>
-                <div>
-                  <h4 className="font-bold">掲載商品</h4>
-                  <ul className="list-disc list-inside space-y-2">
-                    {flyerResponse.flyer_data.flyer_items.map((item, index) => (
-                      <li key={index} className="p-2 border-b">
-                        <p className="font-semibold">{item.product.name} ({item.product.category})</p>
-                        <p>価格: {item.price_including_tax}円 (税抜: {item.price_excluding_tax}円)</p>
-                        <p>単位: {item.unit}</p>
-                        {item.restriction_note && <p className="text-sm text-red-500">{item.restriction_note}</p>}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
+        <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+          <h2 className="text-xl font-semibold mb-2 text-green-800">✅ 店舗情報が更新されました</h2>
+          <div className="text-sm text-green-700">
+            <p><strong>店舗名:</strong> {flyerResponse.flyer_data.store.name}</p>
+            <p><strong>住所:</strong> {flyerResponse.flyer_data.store.prefecture} {flyerResponse.flyer_data.store.city} {flyerResponse.flyer_data.store.street}</p>
           </div>
         </div>
       )}
