@@ -1,17 +1,17 @@
-import { useRouter } from "next/navigation";
+"use client";
+
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Logout() {
-    const router = useRouter()
+  const { logout } = useAuth();
 
-    const handleLogout = () => {
-        localStorage.removeItem("store_token")
-        router.push("/login")
-    } 
+  const handleLogout = () => {
+    logout();
+  };
 
-    return (
-           <a onClick={handleLogout}>
-               ログアウト
-           </a>
-            
-    )
+  return (
+    <a onClick={handleLogout} className="cursor-pointer">
+      ログアウト
+    </a>
+  );
 }

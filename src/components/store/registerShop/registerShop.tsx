@@ -9,52 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { Store, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+
 const registerSchema = z.object({
-  name: z.string().min(1, "店舗名は必須です"),
   email: z.string().email("有効なメールアドレスを入力してください"),
   password: z.string().min(6, "6文字以上のパスワードを入力してください"),
-  phone_number: z.string().min(10, "電話番号を入力してください"),
-  address_zipcode: z.string().min(7, "郵便番号を入力してください"),
-  address_prefecture: z.string().min(1, "都道府県を入力してください"),
-  address_city: z.string().min(1, "市区町村を入力してください"),
-  address_street: z.string().min(1, "番地を入力してください"),
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
-
-// Dummy data for testing
-// const DUMMY_RESPONSE = {
-//   success: true,
-//   message: "登録確認メールを送信しました。メールをご確認ください。",
-//   data: {
-//     token: "dummy.jwt.token"
-//   }
-// };
-
-/*
-API Implementation Notes:
-POST /api/store/register
-Headers: {
-  'Content-Type': 'application/json'
-}
-Request Body: {
-  name: string,
-  email: string,
-  password: string,
-  phone_number: string,
-  address_zipcode: string,
-  address_prefecture: string,
-  address_city: string,
-  address_street: string
-}
-Response: {
-  success: boolean,
-  message: string,
-  data: {
-    token: string // JWT token
-  }
-}
-*/
 
 export default function StoreRegister() {
   const {
@@ -68,84 +32,170 @@ export default function StoreRegister() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
- const onSubmit = async (data: RegisterForm) => {
-  setError("");
-  try {
-    console.log("送信データ:", data);
+  const onSubmit = async (data: RegisterForm) => {
+    setError("");
+    setIsLoading(true);
+    try {
+      console.log("送信データ:", data);
 
-    const payload = {
-      name: data.name,
-      prefecture: data.address_prefecture,
-      city: data.address_city,
-      street: data.address_street,
-    };
+      // Emailとパスワードで簡単な登録
+      const payload = {
+        email: data.email,
+        password: data.password,
+      };
 
-    const response = await axios.post("http://localhost:8080/api/v1/stores", payload);
+      console.log("送信ペイロード:", payload);
 
-    if (response.data?.data?.token) {
-      localStorage.setItem("store_token", response.data.data.token);
+      const response = await axios.post("http://localhost:8080/store/shopRegister", payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log("レスポンス:", response.data);
+
+      if (response.data?.data?.token) {
+        // 認証フックを使用してトークンを保存
+        login(response.data.data.token);
+      }
+
+      setSuccessMessage(response.data.message || "新規登録が完了しました");
+      setSuccess(true);
+      
+      // 少し待ってから店舗情報設定画面へリダイレクト
+      setTimeout(() => {
+        router.push("/store/editShop");
+      }, 1500);
+    } catch (err: any) {
+      console.error("登録エラー詳細:", {
+        message: err.message,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+      
+      // サーバーからのエラーメッセージを優先的に表示
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status) {
+        setError(`リクエストエラー (${err.response.status}): ${err.response.statusText || '不明なエラー'}`);
+      } else if (err.message) {
+        setError(`ネットワークエラー: ${err.message}`);
+      } else {
+        setError("登録に失敗しました");
+      }
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setSuccessMessage(response.data.message);
-    setSuccess(true);
-    router.push("/store/");
-  } catch (err: any) {
-    console.error("登録エラー:", err.response?.data);
-    setError("登録に失敗しました");
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white shadow-xl border-0 rounded-3xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-center">
+            <div className="flex justify-center mb-3">
+              <div className="bg-white rounded-full p-3 shadow-lg">
+                <Store className="w-8 h-8 text-green-600" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">登録完了！</h2>
+            <p className="text-green-100 text-sm">{successMessage}</p>
+          </div>
+          <CardContent className="p-8 text-center">
+            <p className="text-gray-600 mb-4">店舗情報設定画面に移動します...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
-};
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-md p-6">
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="name">店舗名</Label>
-              <Input id="name" {...register("name")} />
-              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white shadow-xl border-0 rounded-3xl overflow-hidden">
+        {/* ヘッダー */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-center">
+          <div className="flex justify-center mb-3">
+            <div className="bg-white rounded-full p-3 shadow-lg">
+              <Store className="w-8 h-8 text-orange-600" />
             </div>
-            <div>
-              <Label htmlFor="email">メールアドレス</Label>
-              <Input id="email" type="email" {...register("email")} />
-              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">新規店舗登録</h2>
+          <p className="text-orange-100 text-sm">めぐるで地域とつながりましょう</p>
+        </div>
+
+        <CardContent className="p-8">
+          {/* ログインに戻るリンク */}
+          <Link
+            href="/login"
+            className="flex items-center space-x-2 text-gray-600 hover:text-orange-600 mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">ログイン画面に戻る</span>
+          </Link>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="email" className="text-gray-700 font-medium">メールアドレス</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  {...register("email")} 
+                  className="mt-1 rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                  placeholder="store@example.com"
+                />
+                {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
+              </div>
+
+              <div>
+                <Label htmlFor="password" className="text-gray-700 font-medium">パスワード</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  {...register("password")} 
+                  className="mt-1 rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                  placeholder="6文字以上のパスワード"
+                />
+                {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="password">パスワード</Label>
-              <Input id="password" type="password" {...register("password")} />
-              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p className="text-sm text-orange-800">
+                <strong>簡単登録：</strong>Emailとパスワードだけですぐに始められます。店舗の詳細情報は後から設定できます。
+              </p>
             </div>
-            <div>
-              <Label htmlFor="phone_number">電話番号</Label>
-              <Input id="phone_number" {...register("phone_number")} />
-              {errors.phone_number && <p className="text-sm text-red-500">{errors.phone_number.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="address_zipcode">郵便番号</Label>
-              <Input id="address_zipcode" {...register("address_zipcode")} placeholder="1234567" />
-              {errors.address_zipcode && <p className="text-sm text-red-500">{errors.address_zipcode.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="address_prefecture">都道府県</Label>
-              <Input id="address_prefecture" {...register("address_prefecture")} />
-              {errors.address_prefecture && <p className="text-sm text-red-500">{errors.address_prefecture.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="address_city">市区町村</Label>
-              <Input id="address_city" {...register("address_city")} />
-              {errors.address_city && <p className="text-sm text-red-500">{errors.address_city.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="address_street">番地</Label>
-              <Input id="address_street" {...register("address_street")} />
-              {errors.address_street && <p className="text-sm text-red-500">{errors.address_street.message}</p>}
-            </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full">
-              登録
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isLoading ? "登録中..." : "新規登録"}
             </Button>
+
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                アカウントをお持ちですか？{" "}
+                <Link href="/login" className="text-orange-600 hover:text-orange-700 font-medium">
+                  ログイン
+                </Link>
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
