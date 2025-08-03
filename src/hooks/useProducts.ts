@@ -57,9 +57,10 @@ export const useProducts = () => {
         headers: getAuthHeaders(),
       });
       setProducts(response.data.data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
       console.error('商品一覧取得エラー:', err);
-      setError(err.response?.data?.error || '商品一覧の取得に失敗しました');
+      setError(axiosError.response?.data?.error || '商品一覧の取得に失敗しました');
       setProducts([]);
     } finally {
       setIsLoading(false);
@@ -92,9 +93,10 @@ export const useProducts = () => {
       const newProduct = response.data.data;
       setProducts(prev => [...prev, newProduct]);
       return newProduct;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
       console.error('商品作成エラー:', err);
-      setError(err.response?.data?.error || '商品の作成に失敗しました');
+      setError(axiosError.response?.data?.error || '商品の作成に失敗しました');
       return null;
     } finally {
       setIsLoading(false);
@@ -127,9 +129,10 @@ export const useProducts = () => {
       const updatedProduct = response.data.data;
       setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
       return updatedProduct;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
       console.error('商品更新エラー:', err);
-      setError(err.response?.data?.error || '商品の更新に失敗しました');
+      setError(axiosError.response?.data?.error || '商品の更新に失敗しました');
       return null;
     } finally {
       setIsLoading(false);
@@ -146,9 +149,10 @@ export const useProducts = () => {
       });
       setProducts(prev => prev.filter(p => p.id !== id));
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
       console.error('商品削除エラー:', err);
-      setError(err.response?.data?.error || '商品の削除に失敗しました');
+      setError(axiosError.response?.data?.error || '商品の削除に失敗しました');
       return false;
     } finally {
       setIsLoading(false);
@@ -164,9 +168,10 @@ export const useProducts = () => {
         headers: getAuthHeaders(),
       });
       return response.data.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
       console.error('商品取得エラー:', err);
-      setError(err.response?.data?.error || '商品の取得に失敗しました');
+      setError(axiosError.response?.data?.error || '商品の取得に失敗しました');
       return null;
     } finally {
       setIsLoading(false);

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Pencil, Trash } from "lucide-react";
-import { useState } from "react";
 import Link from 'next/link';
 
 // ダミーデータの作成
@@ -30,8 +29,6 @@ const dummyFoods = [
 ];
 
 export default function AllRegisterdFood() {
-    const [selectedFood, setSelectedFood] = useState<typeof dummyFoods[0] | null>(null);
-
     const handleDelete = (food: typeof dummyFoods[0]) => {
         // Implement delete logic here
         console.log('Delete:', food);

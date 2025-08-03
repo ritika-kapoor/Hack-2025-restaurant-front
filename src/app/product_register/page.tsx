@@ -99,9 +99,16 @@ export default function ProductRegister() {
       
       // 店舗編集ページへリダイレクト
       window.location.href = `/store/editShop`;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error); // デバッグログ
-      setErrorMessage(error.response?.data?.error || error.message || 'アップロードに失敗しました');
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error && typeof error === 'object' && 'response' in error && 
+           error.response && typeof error.response === 'object' && 'data' in error.response &&
+           error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data)
+          ? String(error.response.data.error)
+          : 'アップロードに失敗しました';
+      setErrorMessage(errorMessage);
     } finally {
       setIsUploading(false);
     }

@@ -112,7 +112,7 @@ export default function EditShop() {
         setValue("city", profile.city || "");
         setValue("street", profile.street || "");
         
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("店舗情報の取得に失敗しました:", err);
         setError("店舗情報の取得に失敗しました");
       } finally {
@@ -140,9 +140,13 @@ export default function EditShop() {
       if (response.status === 200) {
         setSuccessMessage("店舗情報を更新しました");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("更新エラー:", err);
-      setError(err.response?.data?.error || "店舗情報の更新に失敗しました");
+      const axiosError = err as { response?: { data?: { error?: string } } };
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : axiosError?.response?.data?.error || "店舗情報の更新に失敗しました";
+      setError(errorMessage);
     }
   };
 

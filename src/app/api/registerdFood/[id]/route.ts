@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 
-export const dummyRegisteredFoods = [
+const dummyRegisteredFoods = [
     {
         id: 1,
         product_name: "ダミー商品",
@@ -34,9 +34,10 @@ export const dummyRegisteredFoods = [
 // GET /api/registerdFood/[id]
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const id = Number(params.id);
+    const { id: idParam } = await params;
+    const id = Number(idParam);
     const food = dummyRegisteredFoods.find((f) => f.id === id);
 
     if (!food) {

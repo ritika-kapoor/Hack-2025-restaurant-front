@@ -3,6 +3,26 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
+  FileImage, 
+  Store, 
+  Calendar, 
+  Package,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+  Eye,
+  ShoppingCart
+} from 'lucide-react';
 
 interface Product {
   name: string;
@@ -30,6 +50,7 @@ interface Store {
 
 interface FlyerData {
   id: string;
+  store_id: string;
   image_data: string;
   flyer_data: {
     store: Store;
@@ -42,27 +63,32 @@ interface FlyerData {
 const FlyerPage = () => {
   const params = useParams();
   const storeId = params.store_id;
-  const [flyerData, setFlyerData] = useState<FlyerData | null>(null);
+  const [flyerDataList, setFlyerDataList] = useState<FlyerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+
+  // 画像モーダルを開く関数
+  const openImageModal = (imageData: string) => {
+    setSelectedImage(imageData);
+    setIsImageModalOpen(true);
+  };
 
   useEffect(() => {
     if (!storeId) return;
 
     const fetchFlyerData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/flyer/${storeId}`);
-        if (response.status === 404) {
-          setError('チラシが見つかりませんでした。');
-          return;
-        }
+        const response = await fetch(`http://localhost:8080/api/v1/flyer/all/${storeId}`);
         if (!response.ok) {
           throw new Error('データの取得に失敗しました。');
         }
         const result = await response.json();
         console.log("result", result);
         
-        setFlyerData(result.data);
+        // データが配列として返される
+        setFlyerDataList(Array.isArray(result.data) ? result.data : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
@@ -74,69 +100,237 @@ const FlyerPage = () => {
   }, [storeId]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">読み込み中...</div>;
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-600 mb-4" />
+            <p className="text-gray-600">チラシ情報を読み込み中...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">エラーが発生しました</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button onClick={() => window.location.reload()} className="bg-orange-600 hover:bg-orange-700">
+              再読み込み
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  if (!flyerData || !flyerData.flyer_data) {
-    return <div className="flex justify-center items-center h-screen">チラシデータがありません。</div>;
+  if (flyerDataList.length === 0) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+              <FileImage className="w-8 h-8 text-orange-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">チラシがありません</h2>
+            <p className="text-gray-600 mb-6">この店舗にはまだチラシが登録されていません。</p>
+            <Button asChild className="bg-orange-600 hover:bg-orange-700">
+              <Link href="/store/flyer">チラシを登録する</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
-
-  const { flyer_data, image_data, created_at } = flyerData;
-  const { campaign, store, flyer_items } = flyer_data;
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="p-4 sm:p-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{campaign.name}</h1>
-          <p className="text-md text-gray-600">{store.name} ({store.address})</p>
-          <p className="text-sm text-gray-500">期間: {campaign.start_date} ~ {campaign.end_date}</p>
-          <p className="text-xs text-gray-400 mt-1">登録日時: {new Date(created_at).toLocaleString()}</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6">
-          <div className="lg:col-span-1">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">チラシ画像</h2>
-            <img
-              src={`data:image/png;base64,${image_data}`}
-              alt="Flyer"
-              className="w-full h-auto rounded-lg shadow-md"
-            />
-          </div>
-          <div className="lg:col-span-1">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">掲載商品</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">商品名</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">価格(税抜)</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">単位</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">備考</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {flyer_items.map((item, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
-                        <p className="text-xs text-gray-500">{item.product.category}</p>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">¥{item.price_excluding_tax.toLocaleString()}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{item.unit}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{item.restriction_note}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" onClick={() => window.history.back()} className="flex items-center space-x-2">
+              <ArrowLeft className="w-4 h-4" />
+              <span>戻る</span>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">登録済みチラシ一覧</h1>
+              <p className="text-gray-600 mt-1">
+                {flyerDataList[0]?.flyer_data?.store?.name && `${flyerDataList[0].flyer_data.store.name} - `}
+                {flyerDataList.length}件のチラシが登録されています
+              </p>
             </div>
           </div>
         </div>
+
+        {/* チラシ一覧 */}
+        <div className="space-y-8">
+          {flyerDataList.map((flyerData, flyerIndex) => {
+            if (!flyerData.flyer_data) return null;
+            
+            const { flyer_data, image_data, created_at } = flyerData;
+            const { campaign, store, flyer_items } = flyer_data;
+
+            return (
+              <Card key={flyerData.id} className="shadow-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <FileImage className="w-6 h-6" />
+                      <div>
+                        <h2 className="text-xl font-bold">
+                          {campaign.name || `チラシ #${flyerIndex + 1}`}
+                        </h2>
+                        <p className="text-orange-100 text-sm">
+                          登録日: {new Date(created_at).toLocaleDateString('ja-JP')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center space-x-2 text-orange-100 text-sm">
+                        <Store className="w-4 h-4" />
+                        <span>{store.name}</span>
+                      </div>
+                      {campaign.start_date && (
+                        <div className="flex items-center space-x-2 text-orange-100 text-sm mt-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{campaign.start_date} 〜 {campaign.end_date}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* チラシ画像 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Eye className="w-5 h-5 text-orange-600" />
+                        <h3 className="text-lg font-semibold text-gray-800">チラシ画像</h3>
+                      </div>
+                      <div 
+                        className="relative rounded-xl overflow-hidden border-2 border-orange-200 bg-white shadow-sm cursor-pointer hover:border-orange-300 transition-colors duration-200 group"
+                        onClick={() => openImageModal(image_data)}
+                      >
+                        <img
+                          src={`data:image/png;base64,${image_data}`}
+                          alt={`チラシ ${flyerIndex + 1}`}
+                          className="w-full h-auto object-contain max-h-96"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-orange-600 text-white px-3 py-1.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center space-x-1">
+                            <Eye className="w-4 h-4" />
+                            <span>拡大表示</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 商品情報 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Package className="w-5 h-5 text-orange-600" />
+                          <h3 className="text-lg font-semibold text-gray-800">掲載商品</h3>
+                        </div>
+                        <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                          {flyer_items.length}商品
+                        </div>
+                      </div>
+                      
+                      {flyer_items.length > 0 ? (
+                        <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+                          <div className="space-y-3">
+                            {flyer_items.map((item: FlyerItem, index: number) => (
+                              <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-gray-900">{item.product.name}</h4>
+                                    <p className="text-sm text-gray-500">{item.product.category}</p>
+                                    {item.restriction_note && (
+                                      <p className="text-xs text-orange-600 mt-1">{item.restriction_note}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right ml-4">
+                                    <p className="font-semibold text-gray-900">
+                                      ¥{item.price_excluding_tax.toLocaleString()}
+                                    </p>
+                                    <p className="text-sm text-gray-500">{item.unit}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 rounded-xl p-8 text-center">
+                          <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                          <p className="text-gray-600">商品情報がありません</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* フッターアクション */}
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild className="bg-orange-600 hover:bg-orange-700">
+            <Link href="/store/flyer" className="flex items-center justify-center space-x-2">
+              <FileImage className="w-4 h-4" />
+              <span>新しいチラシを登録</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="border-orange-600 text-orange-700 hover:bg-orange-50">
+            <a href="/store/editShop" className="flex items-center justify-center space-x-2">
+              <Store className="w-4 h-4" />
+              <span>店舗情報を編集</span>
+            </a>
+          </Button>
+        </div>
       </div>
+
+      {/* 画像モーダル */}
+      <Dialog 
+        open={isImageModalOpen} 
+        onOpenChange={(open) => {
+          setIsImageModalOpen(open);
+          if (!open) {
+            setSelectedImage('');
+          }
+        }}
+      >
+        <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>チラシ画像の拡大表示</DialogTitle>
+          </DialogHeader>
+          {/* カスタムヘッダー */}
+          <div className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 flex items-center space-x-2">
+            <Eye className="w-5 h-5 text-white" />
+            <h2 className="text-white text-lg font-semibold">チラシ画像</h2>
+          </div>
+          <div className="flex items-center justify-center bg-gray-50 p-4 max-h-[calc(90vh-80px)] overflow-auto">
+            {selectedImage && (
+              <img
+                src={`data:image/png;base64,${selectedImage}`}
+                alt="チラシ拡大表示"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

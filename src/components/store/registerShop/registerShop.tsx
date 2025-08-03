@@ -8,10 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import { Store, ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
 
 const registerSchema = z.object({
   email: z.string().email("有効なメールアドレスを入力してください"),
@@ -31,10 +29,7 @@ export default function StoreRegister() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const { login } = useAuth();
 
   const onSubmit = async (data: RegisterForm) => {
     setError("");
@@ -59,27 +54,35 @@ export default function StoreRegister() {
       console.log("レスポンス:", response.data);
 
       // 新規登録後はトークンを保存せずに、メール確認画面を表示
-      setSuccessMessage(response.data.message || "新規登録が完了しました");
       setSuccess(true);
       
       // 自動リダイレクトは削除（メールからのリンクでログインしてもらう）
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as { 
+        response?: { 
+          status?: number; 
+          statusText?: string; 
+          data?: { error?: string; message?: string } 
+        };
+        message?: string;
+      };
+      
       console.error("登録エラー詳細:", {
-        message: err.message,
-        response: err.response,
-        status: err.response?.status,
-        data: err.response?.data,
+        message: err instanceof Error ? err.message : 'Unknown error',
+        response: axiosError?.response,
+        status: axiosError?.response?.status,
+        data: axiosError?.response?.data,
       });
       
       // サーバーからのエラーメッセージを優先的に表示
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.status) {
-        setError(`リクエストエラー (${err.response.status}): ${err.response.statusText || '不明なエラー'}`);
-      } else if (err.message) {
-        setError(`ネットワークエラー: ${err.message}`);
+      if (axiosError.response?.data?.error) {
+        setError(axiosError.response.data.error);
+      } else if (axiosError.response?.data?.message) {
+        setError(axiosError.response.data.message);
+      } else if (axiosError.response?.status) {
+        setError(`リクエストエラー (${axiosError.response.status}): ${axiosError.response.statusText || '不明なエラー'}`);
+      } else if (axiosError.message) {
+        setError(`ネットワークエラー: ${axiosError.message}`);
       } else {
         setError("登録に失敗しました");
       }

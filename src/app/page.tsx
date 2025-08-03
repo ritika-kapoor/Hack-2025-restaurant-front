@@ -34,6 +34,11 @@ export default function Home() {
       console.log("Push Subscription:", JSON.stringify(subscription));
       
       const subscriptionData = subscription.toJSON();
+      
+      if (!subscriptionData.keys) {
+        throw new Error('Subscription keys are missing');
+      }
+      
       const payload = {
         endpoint: subscriptionData.endpoint,
         p256dh: subscriptionData.keys.p256dh,

@@ -30,19 +30,17 @@ const chartConfig = {
   count: {
     label: "販売数",
   },
-  items: {
-    cabbage: {
-      label: "キャベツ",
-      color: "var(--chart-1)",
-    },
-    tomato: {
-      label: "トマト", 
-      color: "var(--chart-2)",
-    },
-    cucumber: {
-      label: "きゅうり",
-      color: "var(--chart-3)",
-    },
+  cabbage: {
+    label: "キャベツ",
+    color: "var(--chart-1)",
+  },
+  tomato: {
+    label: "トマト", 
+    color: "var(--chart-2)",
+  },
+  cucumber: {
+    label: "きゅうり",
+    color: "var(--chart-3)",
   },
 } satisfies ChartConfig
 

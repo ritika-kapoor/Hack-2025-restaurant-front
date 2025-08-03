@@ -89,9 +89,10 @@ export default function ProductRegister() {
         if (flyerResponse.data.data) {
           setExistingFlyer(flyerResponse.data.data);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         // 404の場合は既存チラシがないということなので、エラーにしない
-        if (error.response?.status !== 404) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError?.response?.status !== 404) {
           console.error('Failed to check existing flyer:', error);
         }
       } finally {
@@ -152,9 +153,13 @@ export default function ProductRegister() {
       
       // 成功メッセージをUIで表示（alertは削除）
       // 自動リダイレクトは削除し、ユーザーが選択できるようにする
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error);
-      setErrorMessage(error.response?.data?.error || error.message || 'アップロードに失敗しました');
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : axiosError?.response?.data?.error || 'アップロードに失敗しました';
+      setErrorMessage(errorMessage);
     } finally {
       setIsUploading(false);
     }
