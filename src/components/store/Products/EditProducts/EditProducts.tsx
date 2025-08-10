@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useProducts, Product, CreateProductRequest, UpdateProductRequest } from "@/hooks/useProducts";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Edit2, Trash2, Package, Store } from "lucide-react";
+import { Plus, Edit2, Trash2, Package, Store, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ProductSchema = z.object({
     product_name: z.string().min(1, "商品名を入力してください"),
@@ -48,6 +48,38 @@ export default function EditProducts() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    
+    // ページング用のstate
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    
+    // ページング計算
+    const totalItems = products.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentProducts = products.slice(startIndex, endIndex);
+    
+    // ページング関数
+    const goToPage = (page: number) => {
+        setCurrentPage(page);
+        // ページ変更時にフォームを閉じる
+        if (isEditing) {
+            handleCancel();
+        }
+    };
+    
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    };
+    
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    };
 
     const {
         register,
@@ -139,6 +171,15 @@ export default function EditProducts() {
         const success = await deleteProduct(product.id);
         if (success) {
             alert("商品を削除しました");
+            
+            // 削除後のページング調整
+            const newTotalItems = totalItems - 1;
+            const newTotalPages = Math.ceil(newTotalItems / itemsPerPage);
+            
+            // 現在のページが最後のページで、そのページが空になった場合は前のページに移動
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                setCurrentPage(newTotalPages);
+            }
         }
     };
 
@@ -146,8 +187,16 @@ export default function EditProducts() {
     const onSubmit = async (data: ProductForm) => {
         try {
             if (editingProduct) {
-                // 更新
-                const updated = await updateProduct(editingProduct.id, data as UpdateProductRequest, imageFile || undefined);
+                // 更新時は画像URLをフォームデータから除外し、画像ファイルのみを使用
+                const updateData = {
+                    product_name: data.product_name,
+                    category: data.category,
+                    price: data.price,
+                    quantity: data.quantity,
+                    status: data.status,
+                    image_url: '', // 空文字にして既存画像を保持
+                };
+                const updated = await updateProduct(editingProduct.id, updateData, imageFile || undefined);
                 if (updated) {
                     alert("商品を更新しました");
                     handleCancel();
@@ -186,10 +235,10 @@ export default function EditProducts() {
             {/* ヘッダー */}
             <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <Store className="w-8 h-8 text-orange-600" />
-                    <h1 className="text-3xl font-bold text-gray-800">商品管理</h1>
+                    <Store className="w-8 h-8 text-[#F1B300]" />
+                    <h1 className="text-3xl font-bold text-[#563124]">商品管理</h1>
                 </div>
-                <p className="text-gray-600">店舗の商品を登録・編集・削除できます。チラシから登録された商品も編集可能です。</p>
+                <p className="text-[#563124] opacity-80">店舗の商品を登録・編集・削除できます。チラシから登録された商品も編集可能です。</p>
             </div>
 
             {/* エラー表示 */}
@@ -205,8 +254,8 @@ export default function EditProducts() {
             {/* 商品登録/編集フォーム */}
             {isEditing && (
                 <Card className="mb-6">
-                    <CardHeader className="bg-orange-50">
-                        <CardTitle className="flex items-center gap-2 text-orange-700">
+                    <CardHeader className="bg-[#F7F4F4]">
+                        <CardTitle className="flex items-center gap-2 text-[#563124]">
                             <Package className="w-5 h-5" />
                             {editingProduct ? "商品編集" : "新規商品登録"}
                         </CardTitle>
@@ -219,7 +268,7 @@ export default function EditProducts() {
                                     <Input 
                                         id="product_name" 
                                         {...register("product_name")} 
-                                        className="border-orange-200 focus:border-orange-400"
+                                        className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                                     />
                                     {errors.product_name && (
                                         <p className="text-sm text-red-500">{errors.product_name.message}</p>
@@ -232,7 +281,7 @@ export default function EditProducts() {
                                         id="category" 
                                         {...register("category")} 
                                         placeholder="例: 野菜、肉類、パン"
-                                        className="border-orange-200 focus:border-orange-400"
+                                        className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                                     />
                                     {errors.category && (
                                         <p className="text-sm text-red-500">{errors.category.message}</p>
@@ -245,7 +294,7 @@ export default function EditProducts() {
                                         id="price" 
                                         type="number" 
                                         {...register("price")} 
-                                        className="border-orange-200 focus:border-orange-400"
+                                        className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                                     />
                                     {errors.price && (
                                         <p className="text-sm text-red-500">{errors.price.message}</p>
@@ -258,7 +307,7 @@ export default function EditProducts() {
                                         id="quantity" 
                                         type="number" 
                                         {...register("quantity")} 
-                                        className="border-orange-200 focus:border-orange-400"
+                                        className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                                     />
                                     {errors.quantity && (
                                         <p className="text-sm text-red-500">{errors.quantity.message}</p>
@@ -268,13 +317,13 @@ export default function EditProducts() {
 
                             <div>
                                 <Label htmlFor="image_file">商品画像</Label>
-                                <Input
-                                    id="image_file"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="border-orange-200 focus:border-orange-400"
-                                />
+                                                                    <Input
+                                        id="image_file"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
+                                    />
                                 {watch("image_url") && (
                                     <div className="mt-2">
                                         <img 
@@ -288,8 +337,11 @@ export default function EditProducts() {
 
                             <div>
                                 <Label htmlFor="status">状態 *</Label>
-                                <Select onValueChange={(value) => setValue("status", value as "在庫あり" | "在庫なし", { shouldValidate: true })}>
-                                    <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                                <Select 
+                                    value={watch("status")} 
+                                    onValueChange={(value) => setValue("status", value as "在庫あり" | "在庫なし", { shouldValidate: true })}
+                                >
+                                    <SelectTrigger className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]">
                                         <SelectValue placeholder="選択してください" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -306,7 +358,7 @@ export default function EditProducts() {
                                 <Button 
                                     type="submit" 
                                     disabled={isSubmitting}
-                                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                                    className="bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold"
                                 >
                                     {isSubmitting ? "保存中..." : editingProduct ? "更新する" : "登録する"}
                                 </Button>
@@ -314,7 +366,7 @@ export default function EditProducts() {
                                     type="button" 
                                     variant="outline" 
                                     onClick={handleCancel}
-                                    className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                                    className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4] font-medium"
                                 >
                                     キャンセル
                                 </Button>
@@ -326,16 +378,16 @@ export default function EditProducts() {
 
             {/* 商品一覧 */}
             <Card>
-                <CardHeader className="bg-orange-50">
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="flex items-center gap-2 text-orange-700">
+                <CardHeader className="bg-[#F7F4F4]">
+                    <div className="items-center">
+                        <CardTitle className="flex items-center gap-2 text-[#563124]">
                             <Package className="w-5 h-5" />
                             登録済み商品一覧
                         </CardTitle>
                         {!isEditing && (
                             <Button 
                                 onClick={handleAddProduct}
-                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                                className="bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold mt-4"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 新規登録
@@ -344,17 +396,29 @@ export default function EditProducts() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-6">
+                    {/* ページング情報 */}
+                    {!isLoading && products.length > 0 && (
+                        <div className="flex justify-between items-center mb-4 text-sm text-[#563124] opacity-70">
+                            <div>
+                                {totalItems}件中 {Math.min(startIndex + 1, totalItems)}-{Math.min(endIndex, totalItems)}件を表示
+                            </div>
+                            <div>
+                                ページ {currentPage} / {totalPages}
+                            </div>
+                        </div>
+                    )}
+                    
                     {isLoading ? (
                         <div className="text-center py-8">
-                            <div className="text-orange-600">商品を読み込み中...</div>
+                            <div className="text-[#563124]">商品を読み込み中...</div>
                         </div>
                     ) : products.length === 0 ? (
                         <div className="text-center py-8">
                             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500 mb-4">まだ商品が登録されていません</p>
+                            <p className="text-[#563124] opacity-70 mb-4">まだ商品が登録されていません</p>
                             <Button 
                                 onClick={handleAddProduct}
-                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                                className="bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 最初の商品を登録
@@ -362,7 +426,7 @@ export default function EditProducts() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {products.map((product) => (
+                            {currentProducts.map((product) => (
                                 <Card key={product.id} className="border border-orange-100 hover:shadow-lg transition-shadow">
                                     <CardContent className="p-4">
                                         {product.image_url && (
@@ -374,7 +438,7 @@ export default function EditProducts() {
                                         )}
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-start">
-                                                <h3 className="font-semibold text-gray-800 text-lg">{product.product_name}</h3>
+                                                <h3 className="font-semibold text-[#563124] text-lg">{product.product_name}</h3>
                                                 <Badge 
                                                     variant={product.status === "在庫あり" ? "default" : "secondary"}
                                                     className={product.status === "在庫あり" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
@@ -382,16 +446,16 @@ export default function EditProducts() {
                                                     {product.status}
                                                 </Badge>
                                             </div>
-                                            <p className="text-gray-600 text-sm">{product.category}</p>
-                                            <p className="text-xl font-bold text-orange-600">¥{product.price.toLocaleString()}</p>
-                                            <p className="text-gray-600 text-sm">在庫: {product.quantity}個</p>
+                                            <p className="text-[#563124] opacity-70 text-sm">{product.category}</p>
+                                            <p className="text-xl font-bold text-[#F1B300]">¥{product.price.toLocaleString()}</p>
+                                            <p className="text-[#563124] opacity-70 text-sm">在庫: {product.quantity}個</p>
                                             
                                             <div className="flex gap-2 pt-3">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => handleEditProduct(product)}
-                                                    className="flex-1 border-orange-600 text-orange-600 hover:bg-orange-50"
+                                                    className="flex-1 border-[#563124] text-[#563124] hover:bg-[#F7F4F4] font-medium"
                                                 >
                                                     <Edit2 className="w-4 h-4 mr-1" />
                                                     編集
@@ -409,6 +473,76 @@ export default function EditProducts() {
                                     </CardContent>
                                 </Card>
                             ))}
+                        </div>
+                    )}
+                    
+                    {/* ページング操作 */}
+                    {!isLoading && products.length > 0 && totalPages > 1 && (
+                        <div className="flex justify-center items-center mt-6 space-x-2">
+                            {/* 前へボタン */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={goToPreviousPage}
+                                disabled={currentPage === 1}
+                                className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                                前へ
+                            </Button>
+                            
+                            {/* ページ番号ボタン */}
+                            <div className="flex space-x-1">
+                                {Array.from({ length: totalPages }, (_, index) => {
+                                    const pageNumber = index + 1;
+                                    
+                                    // 表示するページ番号の制限（現在のページ周辺のみ表示）
+                                    if (
+                                        pageNumber === 1 ||
+                                        pageNumber === totalPages ||
+                                        (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+                                    ) {
+                                        return (
+                                            <Button
+                                                key={pageNumber}
+                                                variant={currentPage === pageNumber ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => goToPage(pageNumber)}
+                                                className={
+                                                    currentPage === pageNumber
+                                                        ? "bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold"
+                                                        : "border-[#563124] text-[#563124] hover:bg-[#F7F4F4]"
+                                                }
+                                            >
+                                                {pageNumber}
+                                            </Button>
+                                        );
+                                    } else if (
+                                        pageNumber === currentPage - 3 ||
+                                        pageNumber === currentPage + 3
+                                    ) {
+                                        return (
+                                            <span key={pageNumber} className="px-2 py-1 text-[#563124] opacity-50">
+                                                ...
+                                            </span>
+                                        );
+                                    }
+                                    
+                                    return null;
+                                })}
+                            </div>
+                            
+                            {/* 次へボタン */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={goToNextPage}
+                                disabled={currentPage === totalPages}
+                                className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                次へ
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
                         </div>
                     )}
                 </CardContent>

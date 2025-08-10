@@ -49,13 +49,13 @@ export default function StoreLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F7F4F4] flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white shadow-xl border-0 rounded-3xl overflow-hidden">
         {/* ヘッダー */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-center">
+        <div className="bg-[#563124] p-6 text-center">
           <div className="flex justify-center mb-3">
             <div className="bg-white rounded-full p-3 shadow-lg">
-              <Store className="w-8 h-8 text-orange-600" />
+              <Store className="w-8 h-8 text-[#F1B300]" />
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">店舗ログイン</h2>
@@ -67,25 +67,25 @@ export default function StoreLogin() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="email" className="text-gray-700 font-medium">メールアドレス</Label>
+                <Label htmlFor="email" className="text-[#563124] font-medium">メールアドレス</Label>
                 <Input 
                   id="email"
                   type="email" 
                   placeholder="store@example.com"
                   {...register("email")} 
-                  className="mt-1 rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                  className="mt-1 rounded-xl border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                 />
                 {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-gray-700 font-medium">パスワード</Label>
+                <Label htmlFor="password" className="text-[#563124] font-medium">パスワード</Label>
                 <Input 
                   id="password"
                   type="password" 
                   placeholder="パスワード"
                   {...register("password")} 
-                  className="mt-1 rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                  className="mt-1 rounded-xl border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                 />
                 {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
               </div>
@@ -100,7 +100,7 @@ export default function StoreLogin() {
             <Button 
               type="submit" 
               disabled={isSubmitting} 
-              className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full h-12 bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isSubmitting ? "ログイン中..." : "ログイン"}
             </Button>
@@ -109,12 +109,12 @@ export default function StoreLogin() {
           {/* 新規登録への導線 */}
           <div className="mt-8 pt-6 border-t border-orange-100">
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-[#563124] mb-4">
                 まだアカウントをお持ちでない方は
               </p>
               <Link
                 href="/store/shopRegister"
-                className="flex items-center justify-center space-x-2 w-full h-12 bg-white border-2 border-orange-500 text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-all duration-200 hover:scale-105"
+                className="flex items-center justify-center space-x-2 w-full h-12 bg-white border-2 border-[#563124] text-[#563124] font-semibold rounded-xl hover:bg-[#F7F4F4] transition-all duration-200 hover:scale-105"
               >
                 <UserPlus className="w-5 h-5" />
                 <span>新規店舗登録</span>
@@ -123,8 +123,8 @@ export default function StoreLogin() {
           </div>
 
           {/* 簡単登録の説明 */}
-          <div className="mt-6 bg-orange-50 border border-orange-200 rounded-xl p-4">
-            <p className="text-sm text-orange-800 text-center">
+          <div className="mt-6 bg-[#F7F4F4] border border-orange-200 rounded-xl p-4">
+            <p className="text-sm text-[#563124] text-center">
               <strong>簡単登録：</strong>Emailとパスワードだけで今すぐ始められます
             </p>
           </div>

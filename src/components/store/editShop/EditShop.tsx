@@ -154,8 +154,8 @@ export default function EditShop() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-600 mx-auto mb-4" />
-          <p className="text-gray-600">店舗情報を読み込み中...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-[#F1B300] mx-auto mb-4" />
+          <p className="text-[#563124]">店舗情報を読み込み中...</p>
         </div>
       </div>
     );
@@ -164,10 +164,10 @@ export default function EditShop() {
   return (
     <div className="space-y-8">
       {/* ヘッダー */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-6 text-white">
+      <div className="bg-[#563124] rounded-2xl p-6 text-white">
         <div className="flex items-center space-x-3">
           <div className="bg-white rounded-full p-3">
-            <Store className="w-6 h-6 text-orange-600" />
+            <Store className="w-6 h-6 text-[#F1B300]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">店舗情報管理</h1>
@@ -185,58 +185,58 @@ export default function EditShop() {
                 {/* 基本情報セクション */}
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 pb-4 border-b border-orange-100">
-                    <Store className="w-5 h-5 text-orange-600" />
-                    <h2 className="text-lg font-semibold text-gray-800">基本情報</h2>
+                    <Store className="w-5 h-5 text-[#F1B300]" />
+                    <h2 className="text-lg font-semibold text-[#563124]">基本情報</h2>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                      <Label htmlFor="name" className="text-gray-700 font-medium">店舗名</Label>
+                      <Label htmlFor="name" className="text-[#563124] font-medium">店舗名</Label>
                       <Input 
                         id="name" 
                         {...register("name")} 
-                        className="mt-1 meguru-input"
+                        className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl"
                         placeholder="例：めぐるカフェ"
                       />
                       {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
                     </div>
                     
                     <div className="md:col-span-2">
-                      <Label htmlFor="email" className="text-gray-700 font-medium">メールアドレス</Label>
+                      <Label htmlFor="email" className="text-[#563124] font-medium">メールアドレス</Label>
                       <Input 
                         id="email" 
                         type="email" 
                         {...register("email")} 
-                        className="mt-1 meguru-input"
+                        className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl"
                         placeholder="store@example.com"
                       />
                       {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
                     </div>
                     
                     <div>
-                      <Label htmlFor="phone_number" className="text-gray-700 font-medium">電話番号</Label>
+                      <Label htmlFor="phone_number" className="text-[#563124] font-medium">電話番号</Label>
                       <Input 
                         id="phone_number" 
                         {...register("phone_number")} 
-                        className="mt-1 meguru-input"
+                        className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl"
                         placeholder="090-1234-5678"
                       />
                       {errors.phone_number && <p className="text-sm text-red-500 mt-1">{errors.phone_number.message}</p>}
                     </div>
                     
                     <div>
-                      <Label htmlFor="zipcode" className="text-gray-700 font-medium">郵便番号</Label>
+                      <Label htmlFor="zipcode" className="text-[#563124] font-medium">郵便番号</Label>
                       <div className="relative">
                         <Input 
                           id="zipcode" 
                           {...register("zipcode")} 
-                          className="mt-1 meguru-input pr-10"
+                          className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl pr-10"
                           placeholder="1234567（ハイフンなし7桁）"
                           maxLength={7}
                         />
                         {isSearchingAddress && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+                            <Loader2 className="w-4 h-4 animate-spin text-[#F1B300]" />
                           </div>
                         )}
                         {!isSearchingAddress && zipcode && zipcode.length === 7 && (
@@ -257,8 +257,8 @@ export default function EditShop() {
                 {/* 住所情報セクション */}
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 pb-4 border-b border-orange-100">
-                    <MapPin className="w-5 h-5 text-orange-600" />
-                    <h2 className="text-lg font-semibold text-gray-800">店舗所在地</h2>
+                    <MapPin className="w-5 h-5 text-[#F1B300]" />
+                    <h2 className="text-lg font-semibold text-[#563124]">店舗所在地</h2>
                     {!addressError && zipcode && zipcode.length === 7 && !isSearchingAddress && (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">自動入力済み</span>
                     )}
@@ -266,33 +266,33 @@ export default function EditShop() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="prefecture" className="text-gray-700 font-medium">都道府県</Label>
+                      <Label htmlFor="prefecture" className="text-[#563124] font-medium">都道府県</Label>
                       <Input 
                         id="prefecture" 
                         {...register("prefecture")} 
-                        className="mt-1 meguru-input"
+                        className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl"
                         placeholder="東京都"
                       />
                       {errors.prefecture && <p className="text-sm text-red-500 mt-1">{errors.prefecture.message}</p>}
                     </div>
                     
                     <div>
-                      <Label htmlFor="city" className="text-gray-700 font-medium">市区町村</Label>
+                      <Label htmlFor="city" className="text-[#563124] font-medium">市区町村</Label>
                       <Input 
                         id="city" 
                         {...register("city")} 
-                        className="mt-1 meguru-input"
+                        className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl"
                         placeholder="渋谷区"
                       />
                       {errors.city && <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>}
                     </div>
                     
                     <div>
-                      <Label htmlFor="street" className="text-gray-700 font-medium">番地</Label>
+                      <Label htmlFor="street" className="text-[#563124] font-medium">番地</Label>
                       <Input 
                         id="street" 
                         {...register("street")} 
-                        className="mt-1 meguru-input"
+                        className="mt-1 border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300] rounded-xl"
                         placeholder="代々木1-2-3"
                       />
                       {errors.street && <p className="text-sm text-red-500 mt-1">{errors.street.message}</p>}
@@ -319,7 +319,7 @@ export default function EditShop() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full meguru-button h-12"
+                  className="w-full bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold h-12 rounded-xl"
                 >
                   {isSubmitting ? (
                     <>
@@ -337,21 +337,21 @@ export default function EditShop() {
 
         {/* サイドバー - チラシ登録への導線 */}
         <div className="space-y-6">
-          <Card className="shadow-lg border-0 bg-gradient-to-br from-orange-50 to-orange-100">
+          <Card className="shadow-lg border-0 bg-[#F7F4F4]">
             <CardContent className="p-6">
               <div className="text-center space-y-4">
                 <div className="bg-white rounded-full p-4 w-16 h-16 mx-auto flex items-center justify-center">
-                  <FileImage className="w-8 h-8 text-orange-600" />
+                  <FileImage className="w-8 h-8 text-[#F1B300]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800 mb-2">チラシで集客アップ！</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="font-bold text-[#563124] mb-2">チラシで集客アップ！</h3>
+                  <p className="text-sm text-[#563124] opacity-70 mb-4">
                     魅力的なチラシを作成して、お客様にお得な情報をお届けしましょう。
                   </p>
                 </div>
                 <Link
                   href="/store/flyer"
-                  className="block w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+                  className="block w-full bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
                 >
                   チラシで登録する
                 </Link>
@@ -361,8 +361,8 @@ export default function EditShop() {
 
           <Card className="shadow-lg border-0">
             <CardContent className="p-6">
-              <h3 className="font-semibold text-gray-800 mb-3">💡 ヒント</h3>
-              <div className="space-y-3 text-sm text-gray-600">
+              <h3 className="font-semibold text-[#563124] mb-3">💡 ヒント</h3>
+              <div className="space-y-3 text-sm text-[#563124] opacity-70">
                 <p>• 郵便番号（7桁）を入力すると住所が自動で入力されます</p>
                 <p>• 正確な住所情報は、お客様がお店を見つけやすくします</p>
                 <p>• 電話番号を登録すると、お客様からのお問い合わせを受けられます</p>

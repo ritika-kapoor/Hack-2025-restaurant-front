@@ -25,7 +25,7 @@ export default function FooterMenu() {
     {
       href: "/store/productRegister", 
       icon: Package,
-      label: "商品登録",
+      label: "商品管理",
       id: "products"
     },
     {

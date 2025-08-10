@@ -110,53 +110,61 @@ export default function ProductLists() {
     };
 
     if (loading) {
-        return <div>フライヤーデータを読み込み中...</div>;
+        return <div className="flex items-center justify-center min-h-[400px] text-[#563124]">フライヤーデータを読み込み中...</div>;
     }
 
     if (error) {
-        return <div>エラー: {error.message}</div>;
+        return <div className="flex items-center justify-center min-h-[400px] text-red-600">エラー: {error.message}</div>;
     }
 
     return (
-        <div>
-            <h1>商品一覧</h1>
+        <div className="container mx-auto p-6 max-w-4xl">
+            <h1 className="text-3xl font-bold text-[#563124] mb-6">商品一覧</h1>
             {flyerData ? (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <h2>店舗情報</h2>
-                    <p>店舗名: {flyerData.store.name}</p>
-                    <p>住所: {flyerData.store.prefecture} {flyerData.store.city} {flyerData.store.street}</p>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="bg-white rounded-lg shadow-sm border p-6">
+                        <h2 className="text-xl font-semibold text-[#563124] mb-4">店舗情報</h2>
+                        <p className="text-[#563124] opacity-80">店舗名: {flyerData.store.name}</p>
+                        <p className="text-[#563124] opacity-80">住所: {flyerData.store.prefecture} {flyerData.store.city} {flyerData.store.street}</p>
+                    </div>
 
-                    <h2>キャンペーン情報</h2>
-                    <p>キャンペーン名: {flyerData.campaign.name}</p>
-                    <p>期間: {flyerData.campaign.start_date} ~ {flyerData.campaign.end_date}</p>
+                    <div className="bg-white rounded-lg shadow-sm border p-6">
+                        <h2 className="text-xl font-semibold text-[#563124] mb-4">キャンペーン情報</h2>
+                        <p className="text-[#563124] opacity-80">キャンペーン名: {flyerData.campaign.name}</p>
+                        <p className="text-[#563124] opacity-80">期間: {flyerData.campaign.start_date} ~ {flyerData.campaign.end_date}</p>
+                    </div>
 
-                    <h2>フライヤーアイテム</h2>
-                    {flyerData.flyer_items && flyerData.flyer_items.length > 0 ? (
-                        <ul>
-                            {flyerData.flyer_items.map((item, index) => (
-                                <li key={index} className="border p-2 mb-2 rounded-md">
-                                    <p>商品名: {item.product.name} ({item.product.category})</p>
-                                    <p>税抜価格: {item.price_excluding_tax}円</p>
-                                    <p>税込価格: {item.price_including_tax}円</p>
-                                    <p>単位: {item.unit}</p>
-                                    {item.restriction_note && <p>制限事項: {item.restriction_note}</p>}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>このフライヤーにはアイテムがありません。</p>
-                    )}
+                    <div className="bg-white rounded-lg shadow-sm border p-6">
+                        <h2 className="text-xl font-semibold text-[#563124] mb-4">フライヤーアイテム</h2>
+                        {flyerData.flyer_items && flyerData.flyer_items.length > 0 ? (
+                            <div className="grid gap-4">
+                                {flyerData.flyer_items.map((item, index) => (
+                                    <div key={index} className="border border-orange-100 p-4 rounded-lg bg-[#F7F4F4]">
+                                        <p className="font-semibold text-[#563124]">商品名: {item.product.name} ({item.product.category})</p>
+                                        <p className="text-[#F1B300] font-bold">税抜価格: {item.price_excluding_tax}円</p>
+                                        <p className="text-[#F1B300] font-bold">税込価格: {item.price_including_tax}円</p>
+                                        <p className="text-[#563124] opacity-70">単位: {item.unit}</p>
+                                        {item.restriction_note && <p className="text-[#563124] opacity-70">制限事項: {item.restriction_note}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-[#563124] opacity-70">このフライヤーにはアイテムがありません。</p>
+                        )}
+                    </div>
 
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                        className="w-full bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 hover:scale-105 disabled:opacity-50"
                     >
                         {isSubmitting ? "保存中..." : "保存"}
                     </button>
                 </form>
             ) : (
-                <div>このストアのフライヤーは見つかりませんでした。</div>
+                <div className="text-center py-8 bg-white rounded-lg shadow-sm border">
+                    <p className="text-[#563124] opacity-70">このストアのフライヤーは見つかりませんでした。</p>
+                </div>
             )}
         </div>
     );

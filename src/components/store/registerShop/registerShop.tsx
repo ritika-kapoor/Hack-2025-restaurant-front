@@ -93,9 +93,9 @@ export default function StoreRegister() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F7F4F4] flex items-center justify-center p-4">
         <Card className="w-full max-w-lg bg-white shadow-xl border-0 rounded-3xl overflow-hidden">
-          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-center">
+          <div className="bg-green-600 p-6 text-center">
             <div className="flex justify-center mb-3">
               <div className="bg-white rounded-full p-3 shadow-lg">
                 <Mail className="w-8 h-8 text-green-600" />
@@ -130,8 +130,8 @@ export default function StoreRegister() {
                 </div>
               </div>
 
-              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <p className="text-sm text-orange-800">
+              <div className="bg-[#F7F4F4] border border-orange-200 rounded-xl p-4">
+                <p className="text-sm text-[#563124]">
                   <strong>メールが届かない場合：</strong>
                   <br />
                   迷惑メールフォルダをご確認いただくか、しばらくお待ちください。
@@ -141,7 +141,7 @@ export default function StoreRegister() {
               <div className="pt-4 border-t border-gray-200">
                 <Link
                   href="/login"
-                  className="inline-flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                  className="inline-flex items-center space-x-2 text-[#563124] hover:text-[#F1B300] font-medium transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>ログイン画面に戻る</span>
@@ -155,13 +155,13 @@ export default function StoreRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F7F4F4] flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white shadow-xl border-0 rounded-3xl overflow-hidden">
         {/* ヘッダー */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-center">
+        <div className="bg-[#563124] p-6 text-center">
           <div className="flex justify-center mb-3">
             <div className="bg-white rounded-full p-3 shadow-lg">
-              <Store className="w-8 h-8 text-orange-600" />
+              <Store className="w-8 h-8 text-[#F1B300]" />
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">新規店舗登録</h2>
@@ -172,7 +172,7 @@ export default function StoreRegister() {
           {/* ログインに戻るリンク */}
           <Link
             href="/login"
-            className="flex items-center space-x-2 text-gray-600 hover:text-orange-600 mb-6 transition-colors"
+            className="flex items-center space-x-2 text-[#563124] hover:text-[#F1B300] mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">ログイン画面に戻る</span>
@@ -181,32 +181,32 @@ export default function StoreRegister() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="email" className="text-gray-700 font-medium">メールアドレス</Label>
+                <Label htmlFor="email" className="text-[#563124] font-medium">メールアドレス</Label>
                 <Input 
                   id="email" 
                   type="email" 
                   {...register("email")} 
-                  className="mt-1 rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                  className="mt-1 rounded-xl border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                   placeholder="store@example.com"
                 />
                 {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-gray-700 font-medium">パスワード</Label>
+                <Label htmlFor="password" className="text-[#563124] font-medium">パスワード</Label>
                 <Input 
                   id="password" 
                   type="password" 
                   {...register("password")} 
-                  className="mt-1 rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                  className="mt-1 rounded-xl border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
                   placeholder="6文字以上のパスワード"
                 />
                 {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
               </div>
             </div>
 
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-              <p className="text-sm text-orange-800">
+            <div className="bg-[#F7F4F4] border border-orange-200 rounded-xl p-4">
+              <p className="text-sm text-[#563124]">
                 <strong>簡単登録：</strong>Emailとパスワードだけですぐに始められます。店舗の詳細情報は後から設定できます。
               </p>
             </div>
@@ -220,15 +220,15 @@ export default function StoreRegister() {
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full h-12 bg-[#F1B300] hover:bg-[#e6a000] text-[#563124] font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? "登録中..." : "新規登録"}
             </Button>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-[#563124]">
                 アカウントをお持ちですか？{" "}
-                <Link href="/login" className="text-orange-600 hover:text-orange-700 font-medium">
+                <Link href="/login" className="text-[#563124] hover:text-[#F1B300] font-medium">
                   ログイン
                 </Link>
               </p>

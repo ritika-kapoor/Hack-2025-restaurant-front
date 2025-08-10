@@ -115,6 +115,7 @@ export const useProducts = () => {
       formData.append('quantity', productData.quantity.toString());
       formData.append('status', productData.status);
       
+      // 画像ファイルが指定されている場合のみ追加
       if (imageFile) {
         formData.append('image', imageFile);
       }
