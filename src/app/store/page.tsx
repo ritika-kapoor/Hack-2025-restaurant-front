@@ -21,6 +21,8 @@ import {
   Eye
 } from "lucide-react";
 
+import TweetFeed from "@/components/tweet/TweetFeed";
+
 // 型定義
 interface Store {
   id: string;
@@ -103,7 +105,6 @@ const StoreHomePage = () => {
   const fetchOgImage = async (url: string): Promise<string | undefined> => {
     try {
       const ogImageUrl = `/api/og-image?url=${encodeURIComponent(url)}`;
-      console.log('Fetching OG image from:', ogImageUrl, 'for article URL:', url);
       const response = await fetch(ogImageUrl);
       if (response.ok) {
         const data = await response.json();
@@ -535,36 +536,9 @@ const StoreHomePage = () => {
           )}
         </section>
 
-        {/* 店舗管理アクションセクション */}
-        <section className="bg-gradient-to-r from-[#F7F4F4] to-white rounded-2xl p-6 border border-orange-200">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Package className="w-6 h-6 text-[#F1B300]" />
-              <h2 className="text-xl font-bold text-[#563124]">店舗管理メニュー</h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button asChild className="bg-[#F1B300] hover:bg-[#e6a000] text-[#563124]">
-                <Link href="/store/flyer">
-                  チラシ登録
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4]">
-                <Link href="/store/productRegister">
-                  商品登録
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4]">
-                <Link href="/store/orders">
-                  注文管理
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4]">
-                <Link href="/store/editShop">
-                  店舗情報
-                </Link>
-              </Button>
-            </div>
-          </div>
+        {/* Tweet Feed Section */}
+        <section>
+          <TweetFeed />
         </section>
         </div>
       </div>
