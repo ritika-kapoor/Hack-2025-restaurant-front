@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
+import Image from 'next/image';
 
 // Define the structure of the response data from the backend
 interface FlyerResponse {
@@ -159,7 +160,7 @@ export default function ProductRegister() {
         {previewUrl && (
           <div className="mb-4">
             <h2 className="text-xl font-semibold mb-2">プレビュー</h2>
-            <img src={previewUrl} alt="Preview" className="max-w-full h-auto border rounded-lg" />
+            <Image src={previewUrl} alt="Preview" width={0} height={0} sizes="100vw" style={{ maxWidth: '100%', height: 'auto' }} className="border rounded-lg" />
           </div>
         )}
 

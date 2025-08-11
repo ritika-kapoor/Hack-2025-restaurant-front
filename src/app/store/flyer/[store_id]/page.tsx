@@ -4,6 +4,7 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,49 +22,54 @@ import {
   AlertCircle,
   ArrowLeft,
   Eye,
-  ShoppingCart
+  ShoppingCart,
+  Clock
 } from 'lucide-react';
-
-interface Product {
-  name: string;
-  category: string;
-}
-
-interface FlyerItem {
-  product: Product;
-  price_excluding_tax: number;
-  price_including_tax: number;
-  unit: string;
-  restriction_note: string;
-}
-
-interface Campaign {
-  name: string;
-  start_date: string;
-  end_date: string;
-}
-
-interface Store {
-  name: string;
-  address: string;
-}
-
-interface FlyerData {
-  id: string;
-  store_id: string;
-  image_data: string;
-  flyer_data: {
-    store: Store;
-    campaign: Campaign;
-    flyer_items: FlyerItem[];
-  } | null;
-  created_at: string;
-}
+import { FlyerResponse, FlyerItem } from '@/types/flyer';
 
 const FlyerPage = () => {
   const params = useParams();
   const storeId = params.store_id;
-  const [flyerDataList, setFlyerDataList] = useState<FlyerData[]>([]);
+
+  // 期限状況を判定するヘルパー関数（日付ベースに修正）
+  const getExpiryStatus = (expiryDate?: string) => {
+    if (!expiryDate) return null;
+    
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    
+    // 日付のみで比較（時間は無視）
+    const expiryDateOnly = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
+    const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const diffDays = Math.ceil((expiryDateOnly.getTime() - nowDateOnly.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      return { status: 'expired', text: '期限切れ', color: 'text-red-600 bg-red-100' };
+    } else if (diffDays === 0) {
+      return { status: 'today', text: '本日期限切れ', color: 'text-orange-600 bg-orange-100' };
+    } else if (diffDays === 1) {
+      return { status: 'tomorrow', text: '明日期限切れ', color: 'text-yellow-600 bg-yellow-100' };
+    } else if (diffDays <= 3) {
+      return { status: 'warning', text: `${diffDays}日後に期限切れ`, color: 'text-yellow-600 bg-yellow-100' };
+    } else {
+      return { status: 'active', text: `${diffDays}日後に期限切れ`, color: 'text-green-600 bg-green-100' };
+    }
+  };
+
+  // 期限の日時を表示用にフォーマットするヘルパー関数
+  const formatExpiryDate = (expiryDate?: string) => {
+    if (!expiryDate) return null;
+    const date = new Date(expiryDate);
+    return date.toLocaleString('ja-JP', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+  const [flyerDataList, setFlyerDataList] = useState<FlyerResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -204,11 +210,27 @@ const FlyerPage = () => {
                           <span>{campaign.start_date} 〜 {campaign.end_date}</span>
                         </div>
                       )}
+                      {flyerData.display_expiry_date && (
+                        <div className="flex items-center space-x-2 text-orange-100 text-sm mt-1">
+                          <Clock className="w-4 h-4" />
+                          <span>表示期限: {formatExpiryDate(flyerData.display_expiry_date)}</span>
+                        </div>
+                      )}
                     </div>
                   </CardTitle>
                 </CardHeader>
 
                 <CardContent className="p-6">
+                  {/* 表示期限ステータス */}
+                  {flyerData.display_expiry_date && (() => {
+                    const expiryStatus = getExpiryStatus(flyerData.display_expiry_date);
+                    return expiryStatus ? (
+                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mb-4 ${expiryStatus.color}`}>
+                        <Clock className="w-4 h-4" />
+                        {expiryStatus.text}
+                      </div>
+                    ) : null;
+                  })()}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* チラシ画像 */}
                     <div className="space-y-4">
@@ -220,9 +242,13 @@ const FlyerPage = () => {
                         className="relative rounded-xl overflow-hidden border-2 border-orange-200 bg-white shadow-sm cursor-pointer hover:border-orange-300 transition-colors duration-200 group"
                         onClick={() => openImageModal(image_data)}
                       >
-                        <img
+                        <Image
                           src={`data:image/png;base64,${image_data}`}
                           alt={`チラシ ${flyerIndex + 1}`}
+                          width={0}
+                          height={0}
+                          sizes="100vw"
+                          style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '24rem' }}
                           className="w-full h-auto object-contain max-h-96"
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -322,9 +348,13 @@ const FlyerPage = () => {
           </div>
           <div className="flex items-center justify-center bg-gray-50 p-4 max-h-[calc(90vh-80px)] overflow-auto">
             {selectedImage && (
-              <img
+              <Image
                 src={`data:image/png;base64,${selectedImage}`}
                 alt="チラシ拡大表示"
+                width={0}
+                height={0}
+                sizes="100vw"
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                 className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
               />
             )}

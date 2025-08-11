@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,44 +19,16 @@ import {
   Store,
   Eye,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  Calendar
 } from 'lucide-react';
-
-// Define the structure of the response data from the backend
-interface FlyerResponse {
-  id: string;
-  store_id: string;
-  image_data: string; // base64 encoded image
-  flyer_data: {
-    store: {
-      name: string;
-      prefecture: string;
-      city: string;
-      street: string;
-    };
-    campaign: {
-      name: string;
-      start_date: string;
-      end_date: string;
-    };
-    flyer_items: {
-      product: {
-        name: string;
-        category: string;
-      };
-      price_excluding_tax: number;
-      price_including_tax: number;
-      unit: string;
-      restriction_note: string;
-    }[];
-  };
-  created_at: string;
-}
+import { FlyerResponse } from '@/types/flyer';
 
 export default function ProductRegister() {
   const { isAuthenticated, isLoading } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [displayExpiryDate, setDisplayExpiryDate] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [flyerResponse, setFlyerResponse] = useState<FlyerResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -131,6 +104,14 @@ export default function ProductRegister() {
 
     const formData = new FormData();
     formData.append('flyer_image', selectedFile);
+    
+    // 表示期限が設定されている場合はJSONで追加
+    if (displayExpiryDate) {
+      const flyerData = {
+        display_expiry_date: new Date(displayExpiryDate).toISOString()
+      };
+      formData.append('flyer_data', JSON.stringify(flyerData));
+    }
 
     try {
       // EditShopと同じパターンでトークンを取得
@@ -301,14 +282,37 @@ export default function ProductRegister() {
                 </div>
               </div>
 
+              {/* 表示期限設定 */}
+              <div className="space-y-2">
+                <Label htmlFor="display_expiry_date" className="text-[#563124] font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#F1B300]" />
+                  表示期限（オプション）
+                </Label>
+                <Input
+                  type="datetime-local"
+                  id="display_expiry_date"
+                  value={displayExpiryDate}
+                  onChange={(e) => setDisplayExpiryDate(e.target.value)}
+                  className="border-orange-200 focus:border-[#F1B300] focus:ring-[#F1B300]"
+                  min={new Date().toISOString().slice(0, 16)} // 現在時刻以降のみ選択可能
+                />
+                <p className="text-sm text-[#563124] opacity-70">
+                  設定した日時を過ぎると、このチラシの商品は自動的に非表示になります
+                </p>
+              </div>
+
               {/* プレビュー */}
               {previewUrl && (
                 <div className="space-y-3">
                   <Label className="text-gray-700 font-medium">プレビュー</Label>
                   <div className="relative rounded-xl overflow-hidden border-2 border-orange-200 bg-white shadow-sm">
-                    <img 
+                    <Image 
                       src={previewUrl} 
                       alt="チラシプレビュー" 
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      style={{ width: '100%', height: 'auto', maxHeight: '24rem', objectFit: 'contain' }}
                       className="w-full h-auto max-h-96 object-contain"
                     />
                     <div className="absolute top-3 right-3">

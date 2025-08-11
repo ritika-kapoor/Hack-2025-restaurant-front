@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useProducts, Product, CreateProductRequest, UpdateProductRequest } from "@/hooks/useProducts";
+import { useProducts, Product, CreateProductRequest } from "@/hooks/useProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, Edit2, Trash2, Package, Store, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -326,9 +327,11 @@ export default function EditProducts() {
                                     />
                                 {watch("image_url") && (
                                     <div className="mt-2">
-                                        <img 
+                                        <Image 
                                             src={watch("image_url")} 
                                             alt="プレビュー" 
+                                            width={128}
+                                            height={128}
                                             className="w-32 h-32 object-cover rounded-lg border"
                                         />
                                     </div>
@@ -430,9 +433,13 @@ export default function EditProducts() {
                                 <Card key={product.id} className="border border-orange-100 hover:shadow-lg transition-shadow">
                                     <CardContent className="p-4">
                                         {product.image_url && (
-                                            <img 
+                                            <Image 
                                                 src={product.image_url} 
                                                 alt={product.product_name}
+                                                width={0}
+                                                height={128}
+                                                sizes="100vw"
+                                                style={{ width: '100%', height: '8rem', objectFit: 'cover' }}
                                                 className="w-full h-32 object-cover rounded-lg mb-3"
                                             />
                                         )}

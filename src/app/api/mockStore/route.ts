@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 // ダミーストアデータ（通常はDBに保存）
-export const dummyStores = [
+const dummyStores = [
   {
     id: 1,
     name: "ダミーストア",
