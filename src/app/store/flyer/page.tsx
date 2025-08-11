@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +22,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { FlyerResponse } from '@/types/flyer';
+import Image from 'next/image';
 
 export default function ProductRegister() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -309,10 +309,8 @@ export default function ProductRegister() {
                     <Image 
                       src={previewUrl} 
                       alt="チラシプレビュー" 
-                      width={0}
-                      height={0}
-                      sizes="100vw"
-                      style={{ width: '100%', height: 'auto', maxHeight: '24rem', objectFit: 'contain' }}
+                      width={500}
+                      height={500}
                       className="w-full h-auto max-h-96 object-contain"
                     />
                     <div className="absolute top-3 right-3">

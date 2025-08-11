@@ -49,12 +49,11 @@ export const useProducts = () => {
   }, []);
 
   // 商品一覧を取得
-  const fetchProducts = useCallback(async (includeExpired = false) => {
+  const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const url = `${API_BASE}?include_expired=${includeExpired}`;
-      const response = await axios.get(url, {
+      const response = await axios.get(API_BASE, {
         headers: getAuthHeaders(),
       });
       setProducts(response.data.data || []);

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { useProducts, Product, CreateProductRequest } from "@/hooks/useProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, Edit2, Trash2, Package, Store, ChevronLeft, ChevronRight } from "lucide-react";
+import { SuccessModal, showSuccessModal } from "@/components/ui/success-modal";
+import Image from "next/image";
 
 const ProductSchema = z.object({
     product_name: z.string().min(1, "商品名を入力してください"),
@@ -53,6 +54,16 @@ export default function EditProducts() {
     // ページング用のstate
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+
+    // モーダル用のstate
+    const [modal, setModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'edit' as 'edit' | 'delete' | 'create'
+    });
+
+    const modalHelpers = showSuccessModal(setModal);
     
     // ページング計算
     const totalItems = products.length;
@@ -171,7 +182,7 @@ export default function EditProducts() {
 
         const success = await deleteProduct(product.id);
         if (success) {
-            alert("商品を削除しました");
+            modalHelpers.delete(product.product_name);
             
             // 削除後のページング調整
             const newTotalItems = totalItems - 1;
@@ -199,14 +210,14 @@ export default function EditProducts() {
                 };
                 const updated = await updateProduct(editingProduct.id, updateData, imageFile || undefined);
                 if (updated) {
-                    alert("商品を更新しました");
+                    modalHelpers.edit(data.product_name);
                     handleCancel();
                 }
             } else {
                 // 新規作成
                 const created = await createProduct(data as CreateProductRequest, imageFile || undefined);
                 if (created) {
-                    alert("商品を登録しました");
+                    modalHelpers.create(data.product_name);
                     handleCancel();
                 }
             }
@@ -327,12 +338,12 @@ export default function EditProducts() {
                                     />
                                 {watch("image_url") && (
                                     <div className="mt-2">
-                                        <Image 
-                                            src={watch("image_url")} 
-                                            alt="プレビュー" 
+                                        <Image
+                                            src={watch("image_url")}
+                                            alt="プレビュー"
                                             width={128}
                                             height={128}
-                                            className="w-32 h-32 object-cover rounded-lg border"
+                                            className="object-cover rounded-lg border"
                                         />
                                     </div>
                                 )}
@@ -433,15 +444,14 @@ export default function EditProducts() {
                                 <Card key={product.id} className="border border-orange-100 hover:shadow-lg transition-shadow">
                                     <CardContent className="p-4">
                                         {product.image_url && (
-                                            <Image 
-                                                src={product.image_url} 
-                                                alt={product.product_name}
-                                                width={0}
-                                                height={128}
-                                                sizes="100vw"
-                                                style={{ width: '100%', height: '8rem', objectFit: 'cover' }}
-                                                className="w-full h-32 object-cover rounded-lg mb-3"
-                                            />
+                                            <div className="relative w-full h-32 mb-3">
+                                                <Image
+                                                    src={product.image_url}
+                                                    alt={product.product_name}
+                                                    fill
+                                                    className="object-cover rounded-lg"
+                                                />
+                                            </div>
                                         )}
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-start">
@@ -554,6 +564,17 @@ export default function EditProducts() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Success Modal */}
+            <SuccessModal
+                isOpen={modal.isOpen}
+                onClose={() => setModal({ ...modal, isOpen: false })}
+                title={modal.title}
+                message={modal.message}
+                type={modal.type}
+                autoClose={true}
+                autoCloseDelay={3000}
+            />
         </div>
     );
 }

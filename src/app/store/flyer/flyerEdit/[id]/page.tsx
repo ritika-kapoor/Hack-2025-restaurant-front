@@ -3,8 +3,8 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Calendar, Clock, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
-import { Clock, Calendar, AlertTriangle } from 'lucide-react';
 import { FlyerResponse } from '@/types/flyer';
 
 const FlyerPage = () => {
@@ -140,14 +140,12 @@ const FlyerPage = () => {
           <div className="lg:col-span-1">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">チラシ画像</h2>
             <Image
-              src={`data:image/png;base64,${image_data}`}
-              alt="Flyer"
-              width={0}
-              height={0}
-              sizes="100vw"
-              style={{ width: '100%', height: 'auto' }}
-              className="w-full h-auto rounded-lg shadow-md"
-            />
+                  src={`data:image/png;base64,${image_data}`}
+                  alt="チラシ"
+                  width={500}
+                  height={707}
+                  className="w-full h-auto rounded-lg border"
+                />
           </div>
           <div className="lg:col-span-1">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">掲載商品</h2>

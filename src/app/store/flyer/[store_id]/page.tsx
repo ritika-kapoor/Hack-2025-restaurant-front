@@ -4,7 +4,6 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,18 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  FileImage, 
-  Store, 
-  Calendar, 
-  Package,
-  Loader2,
-  AlertCircle,
-  ArrowLeft,
-  Eye,
-  ShoppingCart,
-  Clock
-} from 'lucide-react';
+import { Loader2, AlertCircle, FileImage, Store, Calendar, ArrowLeft, Clock, Eye, Package, ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
 import { FlyerResponse, FlyerItem } from '@/types/flyer';
 
 const FlyerPage = () => {
@@ -245,10 +234,8 @@ const FlyerPage = () => {
                         <Image
                           src={`data:image/png;base64,${image_data}`}
                           alt={`チラシ ${flyerIndex + 1}`}
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '24rem' }}
+                          width={500}
+                          height={707}
                           className="w-full h-auto object-contain max-h-96"
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -351,10 +338,8 @@ const FlyerPage = () => {
               <Image
                 src={`data:image/png;base64,${selectedImage}`}
                 alt="チラシ拡大表示"
-                width={0}
-                height={0}
-                sizes="100vw"
-                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                width={800}
+                height={1131}
                 className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
               />
             )}
