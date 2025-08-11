@@ -350,17 +350,17 @@ const StoreHomePage = () => {
 
     return (
     <div className="min-h-screen bg-gradient-to-br from-[#F7F4F4] via-white to-orange-50">
-      <div className="container mx-auto px-4 py-6 space-y-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-6 sm:space-y-8">
         {/* ヘッダー */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Store className="w-8 h-8 text-[#F1B300]" />
-            <h1 className="text-3xl font-bold text-[#563124]">店舗管理ホーム</h1>
-            <Store className="w-8 h-8 text-[#F1B300]" />
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+            <Store className="w-6 h-6 sm:w-8 sm:h-8 text-[#F1B300]" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#563124] whitespace-nowrap">店舗管理ホーム</h1>
+            <Store className="w-6 h-6 sm:w-8 sm:h-8 text-[#F1B300]" />
           </div>
-                      <div className="flex items-center justify-center gap-2 text-[#563124] opacity-70">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">{userCity ? `${userCity}の地域情報` : '地域情報を取得中...'}</span>
+          <div className="flex items-center justify-center gap-2 text-[#563124] opacity-70">
+            <MapPin className="w-4 h-4" />
+            <span className="text-sm">{userCity ? `${userCity}の地域情報` : '地域情報を取得中...'}</span>
           </div>
         </div>
 
@@ -369,24 +369,27 @@ const StoreHomePage = () => {
         {/* 近隣店舗のチラシセクション */}
         {(flyersLoading || nearbyFlyers.length > 0) && (
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#F1B300] rounded-full flex items-center justify-center">
-                  <Users className="w-5 h-5 text-[#563124]" />
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#F1B300] rounded-full flex items-center justify-center flex-shrink-0">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#563124]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#563124] leading-tight">近隣店舗コミュニティ</h2>
+                    <p className="text-xs sm:text-sm text-[#563124] opacity-70 hidden sm:block">地域の取り組みをチェック</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-[#563124]">近隣店舗コミュニティ</h2>
-                  <p className="text-[#563124] opacity-70">地域の取り組みをチェック</p>
-                </div>
+                {nearbyFlyers.length >= 4 && (
+                  <Button asChild variant="outline" className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4] flex-shrink-0 ml-2">
+                    <Link href="/stores" className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-xs sm:text-sm">全て見る</span>
+                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </Link>
+                  </Button>
+                )}
               </div>
-              {nearbyFlyers.length > 0 && (
-                <Button asChild variant="outline" className="border-[#563124] text-[#563124] hover:bg-[#F7F4F4]">
-                  <Link href="/stores" className="flex items-center gap-2">
-                    全て見る
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </Button>
-              )}
+              <p className="text-xs text-[#563124] opacity-70 mt-1 sm:hidden">地域の取り組みをチェック</p>
             </div>
 
             {flyersLoading ? (
@@ -394,23 +397,23 @@ const StoreHomePage = () => {
                 <Loader2 className="w-6 h-6 animate-spin text-[#F1B300]" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
                 {nearbyFlyers.slice(0, 3).map((flyer) => {
                   const expiryStatus = getExpiryStatus(flyer.display_expiry_date || undefined);
                   return (
                     <Card key={flyer.id} className="group hover:shadow-lg transition-shadow duration-300 border-orange-200">
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-[#563124] text-sm mb-1">
+                        <div className="flex items-start justify-between mb-3 gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-[#563124] text-sm mb-1 truncate">
                               {flyer.flyer_data?.store.name}
                             </h3>
-                            <p className="text-xs text-[#563124] opacity-60">
+                            <p className="text-xs text-[#563124] opacity-60 line-clamp-2 leading-tight">
                               {flyer.flyer_data?.campaign.name}
                             </p>
                           </div>
                           {expiryStatus && (
-                            <Badge className={`text-xs px-2 py-0.5 ${expiryStatus.color}`}>
+                            <Badge className={`text-xs px-1.5 py-0.5 ${expiryStatus.color} flex-shrink-0`}>
                               {expiryStatus.text}
                             </Badge>
                           )}
@@ -438,16 +441,17 @@ const StoreHomePage = () => {
 
         {/* フードロス関連ニュースセクション */}
         <section>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#F1B300] rounded-full flex items-center justify-center">
-                <Newspaper className="w-5 h-5 text-[#563124]" />
+          <div className="mb-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#F1B300] rounded-full flex items-center justify-center flex-shrink-0">
+                <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-[#563124]" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-[#563124]">フードロス関連ニュース</h2>
-                <p className="text-[#563124] opacity-70">業界の最新情報</p>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#563124] leading-tight">フードロス関連ニュース</h2>
+                <p className="text-xs sm:text-sm text-[#563124] opacity-70 hidden sm:block">業界の最新情報</p>
               </div>
             </div>
+            <p className="text-xs text-[#563124] opacity-70 mt-1 sm:hidden">業界の最新情報</p>
           </div>
 
           {newsLoading ? (
@@ -458,9 +462,9 @@ const StoreHomePage = () => {
             <div className="space-y-3">
               {newsArticles.slice(0, 5).map((article) => (
                 <Card key={article.id} className="hover:shadow-md transition-shadow duration-300 border-orange-200">
-                  <CardContent className="p-4">
-                    <div className="flex gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#F1B300] to-[#e6a000] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex gap-3 sm:gap-4">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#F1B300] to-[#e6a000] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {article.image ? (
                           <img
                             src={article.image}
@@ -477,31 +481,33 @@ const StoreHomePage = () => {
                             }}
                           />
                         ) : (
-                          <Newspaper className="w-6 h-6 text-[#563124]" />
+                          <Newspaper className="w-4 h-4 sm:w-6 sm:h-6 text-[#563124]" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-[#563124] mb-2 line-clamp-2 text-sm leading-5">
+                        <h3 className="font-semibold text-[#563124] mb-1 sm:mb-2 line-clamp-2 text-xs sm:text-sm leading-tight">
                           {article.title}
                         </h3>
-                        <p className="text-xs text-[#563124] opacity-70 mb-2 line-clamp-2">
+                        <p className="text-xs text-[#563124] opacity-70 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
                           {article.content}
                         </p>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 text-xs text-[#563124] opacity-60">
+                        <div className="flex items-center justify-between mb-1 sm:mb-2">
+                          <div className="flex items-center gap-1 sm:gap-2 text-xs text-[#563124] opacity-60">
                             <Clock className="w-3 h-3" />
-                            <span>{formatDate(article.published)}</span>
+                            <span className="hidden sm:inline">{formatDate(article.published)}</span>
+                            <span className="sm:hidden">{formatDate(article.published).split(' ')[0]}</span>
                           </div>
                           <div className="flex items-center gap-1 text-xs text-[#563124] opacity-60">
                             <Eye className="w-3 h-3" />
-                            <span>{article.viewCount ?? 0} 回閲覧</span>
+                            <span className="hidden sm:inline">{article.viewCount ?? 0} 回閲覧</span>
+                            <span className="sm:hidden">{article.viewCount ?? 0}回</span>
                           </div>
                         </div>
                         <div className="flex justify-end">
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="text-[#F1B300] hover:text-[#e6a000] hover:bg-[#F7F4F4] p-1 h-auto"
+                            className="text-[#F1B300] hover:text-[#e6a000] hover:bg-[#F7F4F4] px-2 py-1 h-auto text-xs"
                             onClick={async () => {
                               // ニュース閲覧を記録
                               await recordNewsView(article);
@@ -510,7 +516,7 @@ const StoreHomePage = () => {
                             }}
                           >
                             <div className="flex items-center gap-1">
-                              <span className="text-xs">読む</span>
+                              <span>読む</span>
                               <ExternalLink className="w-3 h-3" />
                             </div>
                           </Button>
