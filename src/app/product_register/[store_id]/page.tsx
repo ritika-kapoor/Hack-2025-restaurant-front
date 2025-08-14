@@ -3,6 +3,7 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface Product {
   name: string;
@@ -101,9 +102,13 @@ const FlyerPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6">
           <div className="lg:col-span-1">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">チラシ画像</h2>
-            <img
+            <Image
               src={`data:image/png;base64,${image_data}`}
               alt="Flyer"
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: '100%', height: 'auto' }}
               className="w-full h-auto rounded-lg shadow-md"
             />
           </div>
