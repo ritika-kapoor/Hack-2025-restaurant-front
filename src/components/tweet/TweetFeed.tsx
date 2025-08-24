@@ -13,6 +13,14 @@ interface TweetData {
   store_name: string;
 }
 
+interface RawTweetData {
+  id: string;
+  store_id: string;
+  content: string;
+  likes: number;
+  created_at: string;
+}
+
 interface StoreData {
   id: string;
   name: string;
@@ -48,7 +56,7 @@ export default function TweetFeed() {
       const response = await fetch('http://localhost:8080/api/v1/tweets');
       const data = await response.json();
       if (data.data) {
-        const tweetsWithStoreNames = data.data.map((tweet: any) => ({
+        const tweetsWithStoreNames = data.data.map((tweet: RawTweetData) => ({
           ...tweet,
           store_name: storesToUse[tweet.store_id] || 'Unknown Store',
         }));

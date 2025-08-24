@@ -17,7 +17,6 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
-  Package,
   Eye
 } from "lucide-react";
 
@@ -80,6 +79,21 @@ const StoreHomePage = () => {
   const [flyersLoading, setFlyersLoading] = useState(true);
   const [newsLoading, setNewsLoading] = useState(true);
   const [userCity, setUserCity] = useState<string | null>(null);
+
+  // HTMLタグとHTMLエンティティを削除してテキストのみを抽出するヘルパー関数
+  const stripHtmlTags = (html: string): string => {
+    return html
+      .replace(/<[^>]*>/g, '') // HTMLタグを削除
+      .replace(/&nbsp;/g, ' ') // 非改行スペースを通常のスペースに変換
+      .replace(/&amp;/g, '&') // &エンティティをアンパサンドに変換
+      .replace(/&lt;/g, '<') // <エンティティを<に変換
+      .replace(/&gt;/g, '>') // >エンティティを>に変換
+      .replace(/&quot;/g, '"') // "エンティティを"に変換
+      .replace(/&#39;/g, "'") // 'エンティティを'に変換
+      .replace(/&[a-zA-Z0-9#]+;/g, '') // その他のHTMLエンティティを削除
+      .replace(/\s+/g, ' ') // 連続するスペースを1つに統合
+      .trim();
+  };
 
   // 期限状況を判定するヘルパー関数
   const getExpiryStatus = (expiryDate?: string) => {
@@ -490,7 +504,7 @@ const StoreHomePage = () => {
                           {article.title}
                         </h3>
                         <p className="text-xs text-[#563124] opacity-70 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
-                          {article.content}
+                          {stripHtmlTags(article.content)}
                         </p>
                         <div className="flex items-center justify-between mb-1 sm:mb-2">
                           <div className="flex items-center gap-1 sm:gap-2 text-xs text-[#563124] opacity-60">
