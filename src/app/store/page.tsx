@@ -80,7 +80,9 @@ const StoreHomePage = () => {
   const [flyersLoading, setFlyersLoading] = useState(true);
   const [newsLoading, setNewsLoading] = useState(true);
   const [userCity, setUserCity] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
   const [consultingNews, setConsultingNews] = useState<string | null>(null);
+  const [consultingArticle, setConsultingArticle] = useState<NewsArticle | null>(null);
   const [consultationResult, setConsultationResult] = useState<{
     newsId: string;
     newsTitle: string;
@@ -260,6 +262,7 @@ const StoreHomePage = () => {
   const consultWithAI = useCallback(async (article: NewsArticle) => {
     try {
       setConsultingNews(article.id);
+      setConsultingArticle(article);
       
       const response = await fetch("http://localhost:8080/api/v1/news/consult", {
         method: "POST",
@@ -291,6 +294,7 @@ const StoreHomePage = () => {
       alert("AI相談に失敗しました。しばらく時間をおいて再試行してください。");
     } finally {
       setConsultingNews(null);
+      setConsultingArticle(null);
     }
   }, []);
 
@@ -351,6 +355,7 @@ const StoreHomePage = () => {
           if (response.data && response.data.data) {
             currentUserCity = response.data.data.city || '';
             setUserCity(currentUserCity);
+            setUserEmail(response.data.data.email || '');
           }
         } else {
         }
@@ -624,19 +629,21 @@ const StoreHomePage = () => {
         </section>
         </div>
 
-        {/* AI相談モーダル */}
-        <NewsAnalysisModal
-          isOpen={showModal || consultingNews !== null}
-          onClose={() => {
-            setShowModal(false);
-            setConsultationResult(null);
-          }}
-          newsTitle={consultationResult?.newsTitle || ""}
-          newsUrl={consultationResult?.newsUrl || ""}
-          analysisResult={consultationResult?.analysisResult}
-          recommendations={consultationResult?.recommendations}
-          isLoading={consultingNews !== null}
-        />
+              {/* AI相談モーダル */}
+      <NewsAnalysisModal
+        isOpen={showModal || consultingNews !== null}
+        onClose={() => {
+          setShowModal(false);
+          setConsultationResult(null);
+          setConsultingArticle(null);
+        }}
+        newsTitle={consultationResult?.newsTitle || consultingArticle?.title || ""}
+        newsUrl={consultationResult?.newsUrl || consultingArticle?.link || ""}
+        analysisResult={consultationResult?.analysisResult}
+        recommendations={consultationResult?.recommendations}
+        isLoading={consultingNews !== null}
+        defaultEmail={userEmail}
+      />
       </div>
     );
 };

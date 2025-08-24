@@ -125,7 +125,7 @@ export default function TweetFeed() {
           value={newTweetContent}
           onChange={(e) => setNewTweetContent(e.target.value)}
           className="w-full p-4 border rounded-lg"
-          placeholder="What's happening?"
+          placeholder="フードロスに役立つ情報を共有しよう！"
           maxLength={300}
           style={{borderColor: '#F1B300'}}
         />

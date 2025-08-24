@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Mail, CheckCircle } from 'lucide-react';
 
 interface NewsAnalysisModalProps {
@@ -11,6 +11,7 @@ interface NewsAnalysisModalProps {
   analysisResult?: string;
   recommendations?: string;
   isLoading: boolean;
+  defaultEmail?: string;
 }
 
 const NewsAnalysisModal: React.FC<NewsAnalysisModalProps> = ({
@@ -20,11 +21,19 @@ const NewsAnalysisModal: React.FC<NewsAnalysisModalProps> = ({
   newsUrl,
   analysisResult,
   recommendations,
-  isLoading
+  isLoading,
+  defaultEmail = ''
 }) => {
-  const [emailAddress, setEmailAddress] = useState('');
+  const [emailAddress, setEmailAddress] = useState(defaultEmail);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+
+  // defaultEmailが変更されたときにemailAddressを更新
+  useEffect(() => {
+    if (defaultEmail) {
+      setEmailAddress(defaultEmail);
+    }
+  }, [defaultEmail]);
 
   if (!isOpen) return null;
 
@@ -72,7 +81,7 @@ const NewsAnalysisModal: React.FC<NewsAnalysisModalProps> = ({
         <div className="bg-gradient-to-r from-[#563124] to-[#F1B300] text-white p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#563124]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
               </svg>
             </div>
@@ -85,7 +94,7 @@ const NewsAnalysisModal: React.FC<NewsAnalysisModalProps> = ({
             onClick={onClose}
             className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-[#563124]" />
           </button>
         </div>
 
@@ -106,55 +115,53 @@ const NewsAnalysisModal: React.FC<NewsAnalysisModalProps> = ({
           </div>
 
           {isLoading ? (
-            /* プログレスサークル */
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="relative w-20 h-20 mb-6">
-                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    stroke="#F7F4F4"
-                    strokeWidth="8"
-                    fill="none"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    stroke="url(#gradient)"
-                    strokeWidth="8"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray="251.33"
-                    strokeDashoffset="125.67"
-                    className="animate-spin"
-                    style={{
-                      animation: 'spin 2s linear infinite',
-                    }}
-                  />
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#563124" />
-                      <stop offset="100%" stopColor="#F1B300" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+            /* シンプルで確実なローディング */
+            <div className="flex flex-col items-center justify-center py-16">
+              {/* メインローディングアイコン */}
+              <div className="relative mb-8">
+                {/* パルスアニメーション */}
+                <div className="w-24 h-24 bg-gradient-to-br from-[#563124] to-[#F1B300] rounded-full opacity-20 animate-ping"></div>
+                
+                {/* 中央のAIアイコン */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-[#563124]" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                  </svg>
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#563124] to-[#F1B300] rounded-full flex items-center justify-center shadow-xl animate-pulse">
+                    <span className="text-2xl font-bold text-white">🤖</span>
+                  </div>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-[#563124] mb-2">AI分析中...</h3>
-              <p className="text-sm text-[#563124] opacity-70 text-center">
-                ニュース記事を読み取り、スーパーマーケット経営の<br />
-                具体的な対応策を分析しています
-              </p>
-              <div className="mt-4 flex space-x-1">
-                <div className="w-2 h-2 bg-[#563124] rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                <div className="w-2 h-2 bg-[#F1B300] rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                <div className="w-2 h-2 bg-[#563124] rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+
+              {/* テキスト */}
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-[#563124] mb-3">AI分析中...</h3>
+                
+                {/* 分析対象ニュースタイトル */}
+                <div className="bg-white bg-opacity-80 rounded-lg p-4 mb-4 max-w-md mx-auto">
+                  <h4 className="text-sm font-bold text-[#563124] mb-2">📰 分析対象</h4>
+                  <p className="text-sm text-[#563124] font-medium leading-relaxed">
+                    {newsTitle}
+                  </p>
+                </div>
+                
+                <p className="text-sm text-[#563124] opacity-70 max-w-md leading-relaxed">
+                  ニュース記事の内容を読み取り、<br />
+                  スーパーマーケット経営に特化した<br />
+                  具体的な対応策を分析しています
+                </p>
+              </div>
+
+              {/* シンプルなドットローダー */}
+              <div className="flex space-x-2 mb-8">
+                <div className="w-3 h-3 bg-[#563124] rounded-full animate-bounce"></div>
+                <div className="w-3 h-3 bg-[#F1B300] rounded-full animate-bounce"></div>
+                <div className="w-3 h-3 bg-[#563124] rounded-full animate-bounce"></div>
+              </div>
+
+              {/* ステータス表示 */}
+              <div className="bg-white bg-opacity-80 rounded-lg px-6 py-3 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#F1B300] rounded-full animate-ping"></div>
+                  <span className="text-sm font-medium text-[#563124]">記事を解析しています...</span>
+                </div>
               </div>
             </div>
           ) : analysisResult && recommendations ? (
