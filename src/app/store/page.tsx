@@ -82,7 +82,6 @@ const StoreHomePage = () => {
   const [userCity, setUserCity] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>('');
   const [consultingNews, setConsultingNews] = useState<string | null>(null);
-  const [consultingArticle, setConsultingArticle] = useState<NewsArticle | null>(null);
   const [consultationResult, setConsultationResult] = useState<{
     newsId: string;
     newsTitle: string;
@@ -262,7 +261,6 @@ const StoreHomePage = () => {
   const consultWithAI = useCallback(async (article: NewsArticle) => {
     try {
       setConsultingNews(article.id);
-      setConsultingArticle(article);
       
       const response = await fetch("http://localhost:8080/api/v1/news/consult", {
         method: "POST",
@@ -294,7 +292,6 @@ const StoreHomePage = () => {
       alert("AI相談に失敗しました。しばらく時間をおいて再試行してください。");
     } finally {
       setConsultingNews(null);
-      setConsultingArticle(null);
     }
   }, []);
 
@@ -635,10 +632,9 @@ const StoreHomePage = () => {
         onClose={() => {
           setShowModal(false);
           setConsultationResult(null);
-          setConsultingArticle(null);
         }}
-        newsTitle={consultationResult?.newsTitle || consultingArticle?.title || ""}
-        newsUrl={consultationResult?.newsUrl || consultingArticle?.link || ""}
+        newsTitle={consultationResult?.newsTitle || ""}
+        newsUrl={consultationResult?.newsUrl || ""}
         analysisResult={consultationResult?.analysisResult}
         recommendations={consultationResult?.recommendations}
         isLoading={consultingNews !== null}
