@@ -63,11 +63,26 @@ const FlyerPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const [flyerViewCounts, setFlyerViewCounts] = useState<{ [flyerId: string]: number }>({});
 
   // 画像モーダルを開く関数
   const openImageModal = (imageData: string) => {
     setSelectedImage(imageData);
     setIsImageModalOpen(true);
+  };
+
+  // フライヤーのビュー数を取得する関数
+  const fetchFlyerViewCount = async (flyerId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/flyer/views/count/${flyerId}`);
+      if (response.ok) {
+        const result = await response.json();
+        return result.data.view_count || 0;
+      }
+    } catch (error) {
+      console.warn('ビュー数の取得に失敗しました:', error);
+    }
+    return 0;
   };
 
   useEffect(() => {
@@ -83,7 +98,20 @@ const FlyerPage = () => {
         console.log("result", result);
         
         // データが配列として返される
-        setFlyerDataList(Array.isArray(result.data) ? result.data : []);
+        const flyerData = Array.isArray(result.data) ? result.data : [];
+        setFlyerDataList(flyerData);
+
+        // 各フライヤーのビュー数を取得
+        const fetchViewCounts = async () => {
+          const viewCounts: { [flyerId: string]: number } = {};
+          for (const flyer of flyerData) {
+            const count = await fetchFlyerViewCount(flyer.id);
+            viewCounts[flyer.id] = count;
+          }
+          setFlyerViewCounts(viewCounts);
+        };
+
+        fetchViewCounts();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
@@ -210,16 +238,26 @@ const FlyerPage = () => {
                 </CardHeader>
 
                 <CardContent className="p-6">
-                  {/* 表示期限ステータス */}
-                  {flyerData.display_expiry_date && (() => {
-                    const expiryStatus = getExpiryStatus(flyerData.display_expiry_date);
-                    return expiryStatus ? (
-                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mb-4 ${expiryStatus.color}`}>
-                        <Clock className="w-4 h-4" />
-                        {expiryStatus.text}
-                      </div>
-                    ) : null;
-                  })()}
+                  {/* 表示期限ステータスとビュー数 */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      {flyerData.display_expiry_date && (() => {
+                        const expiryStatus = getExpiryStatus(flyerData.display_expiry_date);
+                        return expiryStatus ? (
+                          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${expiryStatus.color}`}>
+                            <Clock className="w-4 h-4" />
+                            {expiryStatus.text}
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                    
+                    {/* ビュー数表示 */}
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      <Eye className="w-4 h-4" />
+                      <span>{flyerViewCounts[flyerData.id] || 0}人のユーザーが見ました</span>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* チラシ画像 */}
                     <div className="space-y-4">

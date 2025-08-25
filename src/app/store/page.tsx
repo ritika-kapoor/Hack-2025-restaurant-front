@@ -17,11 +17,11 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
-  Package,
   Eye
 } from "lucide-react";
 
 import TweetFeed from "@/components/tweet/TweetFeed";
+import NewsAnalysisModal from "@/components/NewsAnalysisModal";
 
 // 型定義
 interface Store {
@@ -80,6 +80,31 @@ const StoreHomePage = () => {
   const [flyersLoading, setFlyersLoading] = useState(true);
   const [newsLoading, setNewsLoading] = useState(true);
   const [userCity, setUserCity] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [consultingNews, setConsultingNews] = useState<string | null>(null);
+  const [consultationResult, setConsultationResult] = useState<{
+    newsId: string;
+    newsTitle: string;
+    newsUrl: string;
+    analysisResult: string;
+    recommendations: string;
+  } | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // HTMLタグとHTMLエンティティを削除してテキストのみを抽出するヘルパー関数
+  const stripHtmlTags = (html: string): string => {
+    return html
+      .replace(/<[^>]*>/g, '') // HTMLタグを削除
+      .replace(/&nbsp;/g, ' ') // 非改行スペースを通常のスペースに変換
+      .replace(/&amp;/g, '&') // &エンティティをアンパサンドに変換
+      .replace(/&lt;/g, '<') // <エンティティを<に変換
+      .replace(/&gt;/g, '>') // >エンティティを>に変換
+      .replace(/&quot;/g, '"') // "エンティティを"に変換
+      .replace(/&#39;/g, "'") // 'エンティティを'に変換
+      .replace(/&[a-zA-Z0-9#]+;/g, '') // その他のHTMLエンティティを削除
+      .replace(/\s+/g, ' ') // 連続するスペースを1つに統合
+      .trim();
+  };
 
   // 期限状況を判定するヘルパー関数
   const getExpiryStatus = (expiryDate?: string) => {
@@ -232,6 +257,44 @@ const StoreHomePage = () => {
     }
   }, []);
 
+  // AI相談機能
+  const consultWithAI = useCallback(async (article: NewsArticle) => {
+    try {
+      setConsultingNews(article.id);
+      
+      const response = await fetch("http://localhost:8080/api/v1/news/consult", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          news_url: article.link,
+          news_title: article.title,
+          news_id: article.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("AI相談に失敗しました");
+      }
+
+      const result = await response.json();
+      setConsultationResult({
+        newsId: article.id,
+        newsTitle: article.title,
+        newsUrl: article.link,
+        analysisResult: result.analysis_result,
+        recommendations: result.recommendations,
+      });
+      setShowModal(true);
+    } catch (error) {
+      console.error("AI相談エラー:", error);
+      alert("AI相談に失敗しました。しばらく時間をおいて再試行してください。");
+    } finally {
+      setConsultingNews(null);
+    }
+  }, []);
+
   // ニュース閲覧を記録
   const recordNewsView = useCallback(async (article: NewsArticle) => {
     try {
@@ -289,6 +352,7 @@ const StoreHomePage = () => {
           if (response.data && response.data.data) {
             currentUserCity = response.data.data.city || '';
             setUserCity(currentUserCity);
+            setUserEmail(response.data.data.email || '');
           }
         } else {
         }
@@ -490,7 +554,7 @@ const StoreHomePage = () => {
                           {article.title}
                         </h3>
                         <p className="text-xs text-[#563124] opacity-70 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
-                          {article.content}
+                          {stripHtmlTags(article.content)}
                         </p>
                         <div className="flex items-center justify-between mb-1 sm:mb-2">
                           <div className="flex items-center gap-1 sm:gap-2 text-xs text-[#563124] opacity-60">
@@ -504,7 +568,27 @@ const StoreHomePage = () => {
                             <span className="sm:hidden">{article.viewCount ?? 0}回</span>
                           </div>
                         </div>
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-[#563124] hover:text-[#563124] hover:bg-[#F7F4F4] px-2 py-1 h-auto text-xs border border-[#563124] border-opacity-30"
+                            onClick={() => consultWithAI(article)}
+                            disabled={consultingNews === article.id}
+                          >
+                            <div className="flex items-center gap-1">
+                              {consultingNews === article.id ? (
+                                <>
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                  <span>分析中...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>AIに相談</span>
+                                </>
+                              )}
+                            </div>
+                          </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -541,6 +625,21 @@ const StoreHomePage = () => {
           <TweetFeed />
         </section>
         </div>
+
+              {/* AI相談モーダル */}
+      <NewsAnalysisModal
+        isOpen={showModal || consultingNews !== null}
+        onClose={() => {
+          setShowModal(false);
+          setConsultationResult(null);
+        }}
+        newsTitle={consultationResult?.newsTitle || ""}
+        newsUrl={consultationResult?.newsUrl || ""}
+        analysisResult={consultationResult?.analysisResult}
+        recommendations={consultationResult?.recommendations}
+        isLoading={consultingNews !== null}
+        defaultEmail={userEmail}
+      />
       </div>
     );
 };

@@ -39,7 +39,7 @@ export default function StoreLogin() {
       const response = await axios.post("http://localhost:8080/api/v1/stores/signin", data);
       
       // 認証フックを使用してトークンを保存
-      login(response.data.token);
+      login(response.data.data.token);
       
       router.push("/store/");
     } catch (error) {
