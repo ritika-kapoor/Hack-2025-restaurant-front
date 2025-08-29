@@ -30,13 +30,17 @@ export function useAuth() {
     };
   }, []);
 
-  const login = (token: string) => {
+  const login = (token: string, storeId?: string) => {
     localStorage.setItem("store_token", token);
+    if (storeId) {
+      localStorage.setItem("store_id", storeId);
+    }
     setIsAuthenticated(true);
   };
 
   const logout = () => {
     localStorage.removeItem("store_token");
+    localStorage.removeItem("store_id");
     setIsAuthenticated(false);
     router.push("/login");
   };
