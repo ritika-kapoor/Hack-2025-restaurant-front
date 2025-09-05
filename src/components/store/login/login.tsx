@@ -38,8 +38,15 @@ export default function StoreLogin() {
     try {
       const response = await axios.post("http://localhost:8080/api/v1/stores/signin", data);
       
-      // 認証フックを使用してトークンを保存
-      login(response.data.data.token);
+      // 認証フックを使用してトークンとstore_idを保存
+      const { token, store_id } = response.data.data;
+      
+      // store_idが取得できない場合のフォールバック処理
+      if (!store_id) {
+        console.warn("store_id not found in login response, will be set later");
+      }
+      
+      login(token, store_id);
       
       router.push("/store/");
     } catch (error) {
