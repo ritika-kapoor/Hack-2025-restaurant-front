@@ -8,8 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Store, ArrowLeft, Mail } from "lucide-react";
+import { Store, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 const registerSchema = z.object({
   email: z.string().email("有効なメールアドレスを入力してください"),
@@ -27,8 +29,9 @@ export default function StoreRegister() {
     resolver: zodResolver(registerSchema),
   });
 
+  const router = useRouter();
+  const { login } = useAuth();
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: RegisterForm) => {
@@ -52,11 +55,24 @@ export default function StoreRegister() {
       });
 
       console.log("レスポンス:", response.data);
-
-      // 新規登録後はトークンを保存せずに、メール確認画面を表示
-      setSuccess(true);
       
-      // 自動リダイレクトは削除（メールからのリンクでログインしてもらう）
+      // 新規登録完了時に直接ログイン状態にする（ログインと同じ処理）
+      const token = response.data.data?.token;
+      if (token) {
+        console.log("トークンが見つかりました:", token);
+        
+        // useAuthフックを使用してログイン状態にする（ログインと同じ方法）
+        login(token);
+        
+        console.log("ログイン状態を設定しました");
+        
+        // ルーターを使ってリダイレクト（ログインと同じ方法）
+        router.push("/store/");
+      } else {
+        console.log("トークンが見つかりません");
+        console.log("response.data:", response.data);
+        setError("登録には成功しましたが、自動ログインに失敗しました。ログインページからログインしてください。");
+      }
     } catch (err: unknown) {
       const axiosError = err as { 
         response?: { 
@@ -91,68 +107,6 @@ export default function StoreRegister() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-[#F7F4F4] flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg bg-white shadow-xl border-0 rounded-3xl overflow-hidden">
-          <div className="bg-green-600 p-6 text-center">
-            <div className="flex justify-center mb-3">
-              <div className="bg-white rounded-full p-3 shadow-lg">
-                <Mail className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">登録完了！</h2>
-            <p className="text-green-100 text-sm">確認メールを送信しました</p>
-          </div>
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                <h3 className="font-semibold text-green-800 mb-3">次のステップ</h3>
-                <div className="space-y-3 text-sm text-green-700">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      1
-                    </div>
-                    <p className="text-left">登録されたメールアドレスをご確認ください</p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      2
-                    </div>
-                    <p className="text-left">確認メール内のリンクをクリックしてサービスにアクセスしてください</p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      3
-                    </div>
-                    <p className="text-left">店舗情報の詳細設定を行ってください</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#F7F4F4] border border-orange-200 rounded-xl p-4">
-                <p className="text-sm text-[#563124]">
-                  <strong>メールが届かない場合：</strong>
-                  <br />
-                  迷惑メールフォルダをご確認いただくか、しばらくお待ちください。
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-gray-200">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center space-x-2 text-[#563124] hover:text-[#F1B300] font-medium transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>ログイン画面に戻る</span>
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#F7F4F4] flex items-center justify-center p-4">
