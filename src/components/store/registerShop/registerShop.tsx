@@ -48,7 +48,8 @@ export default function StoreRegister() {
 
       console.log("送信ペイロード:", payload);
 
-      const response = await axios.post("http://localhost:8080/store/shopRegister", payload, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await axios.post(`${apiBaseUrl}/store/shopRegister`, payload, {
         headers: {
           'Content-Type': 'application/json',
         },

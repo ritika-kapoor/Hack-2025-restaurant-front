@@ -94,7 +94,8 @@ export default function EditShop() {
         setIsLoading(true);
         const token = localStorage.getItem("store_token");
         
-        const response = await axios.get("http://localhost:8080/api/v1/stores/profile", {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+        const response = await axios.get(`${apiBaseUrl}/api/v1/stores/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -130,7 +131,8 @@ export default function EditShop() {
     try {
       const token = localStorage.getItem("store_token");
       
-      const response = await axios.put("http://localhost:8080/api/v1/stores/profile", data, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await axios.put(`${apiBaseUrl}/api/v1/stores/profile`, data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
+
+// API Base URL configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +50,7 @@ export default function ProductRegister() {
         if (!token) return;
 
         // まず現在の店舗IDを取得
-        const profileResponse = await axios.get('http://localhost:8080/api/v1/stores/profile', {
+        const profileResponse = await axios.get(`${API_BASE_URL}/api/v1/stores/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -57,7 +60,7 @@ export default function ProductRegister() {
         setCurrentStoreId(storeId);
 
         // 既存チラシをチェック
-        const flyerResponse = await axios.get(`http://localhost:8080/api/v1/flyer/${storeId}`);
+        const flyerResponse = await axios.get(`${API_BASE_URL}/api/v1/flyer/${storeId}`);
         
         if (flyerResponse.data.data) {
           setExistingFlyer(flyerResponse.data.data);
@@ -121,7 +124,7 @@ export default function ProductRegister() {
       }
 
       // EditShopと同じパターンでaxiosを使用
-      const response = await axios.post('http://localhost:8080/api/v1/flyer/upload', formData, {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/flyer/upload`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

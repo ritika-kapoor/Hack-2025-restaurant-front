@@ -4,6 +4,9 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+
+// API Base URL configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -74,7 +77,7 @@ const FlyerPage = () => {
   // フライヤーのビュー数を取得する関数
   const fetchFlyerViewCount = async (flyerId: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/flyer/views/count/${flyerId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/flyer/views/count/${flyerId}`);
       if (response.ok) {
         const result = await response.json();
         return result.data.view_count || 0;
@@ -90,7 +93,7 @@ const FlyerPage = () => {
 
     const fetchFlyerData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/flyer/all/${storeId}`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/flyer/all/${storeId}`);
         if (!response.ok) {
           throw new Error('データの取得に失敗しました。');
         }

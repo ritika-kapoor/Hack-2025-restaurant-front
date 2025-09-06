@@ -17,7 +17,8 @@ const VerifyEmailContent = () => {
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
-      fetch(`http://localhost:8080/store/verify-email?token=${token}`)
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      fetch(`${apiBaseUrl}/store/verify-email?token=${token}`)
         .then(async (res) => {
           if (res.ok) {
             setStatus('success');

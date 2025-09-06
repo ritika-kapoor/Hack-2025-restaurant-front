@@ -36,7 +36,8 @@ export default function StoreLogin() {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      const response = await axios.post("http://localhost:8080/api/v1/stores/signin", data);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await axios.post(`${apiBaseUrl}/api/v1/stores/signin`, data);
       
       // 認証フックを使用してトークンとstore_idを保存
       const { token, store_id } = response.data.data;
