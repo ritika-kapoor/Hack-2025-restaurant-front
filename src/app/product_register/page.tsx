@@ -85,7 +85,8 @@ export default function ProductRegister() {
       console.log('Sending request with Authorization header:', `Bearer ${token}`); // デバッグログ
 
       // EditShopと同じようにaxiosを使用（FormDataの場合はContent-Type自動設定）
-      const response = await axios.post('http://localhost:8080/api/v1/flyer/upload', formData, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await axios.post(`${apiBaseUrl}/api/v1/flyer/upload`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

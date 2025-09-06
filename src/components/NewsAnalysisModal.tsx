@@ -42,7 +42,8 @@ const NewsAnalysisModal: React.FC<NewsAnalysisModalProps> = ({
 
     setIsSendingEmail(true);
     try {
-      const response = await fetch("http://localhost:8080/api/v1/news/send-email", {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await fetch(`${apiBaseUrl}/api/v1/news/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

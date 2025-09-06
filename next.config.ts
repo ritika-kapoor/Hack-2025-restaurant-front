@@ -74,14 +74,15 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*',
+        destination: `${apiBaseUrl}/api/:path*`,
       },
       {
         source: '/store/shopRegister',
-        destination: 'http://localhost:8080/store/shopRegister',
+        destination: `${apiBaseUrl}/store/shopRegister`,
       },
     ];
   },

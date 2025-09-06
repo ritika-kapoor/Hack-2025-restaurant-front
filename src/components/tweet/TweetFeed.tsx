@@ -4,6 +4,9 @@
 import { useEffect, useState } from 'react';
 import Tweet from './Tweet';
 
+// API Base URL configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
 interface TweetData {
   id: string;
   store_id: string;
@@ -35,7 +38,7 @@ export default function TweetFeed() {
   const fetchTweets = async (currentStores?: Record<string, string>) => {
     const storesToUse = currentStores || stores;
     try {
-      const response = await fetch('http://localhost:8080/api/v1/tweets');
+      const response = await fetch(`${API_BASE_URL}/api/v1/tweets`);
       const data = await response.json();
       if (data.data) {
         const tweetsWithStoreNames = data.data.map((tweet: RawTweetData) => ({
@@ -51,7 +54,7 @@ export default function TweetFeed() {
 
   const fetchStores = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/stores');
+      const response = await fetch(`${API_BASE_URL}/api/v1/stores`);
       const data = await response.json();
       const storeMap = data.data.reduce((acc: Record<string, string>, store: StoreData) => {
         acc[store.id] = store.name;
@@ -67,7 +70,7 @@ export default function TweetFeed() {
   const fetchCurrentStoreId = async () => {
     try {
       // 現在のユーザーの投稿を取得してstore_idを特定
-      const response = await fetch('http://localhost:8080/api/v1/tweets', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tweets`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('store_token')}`,
         },
@@ -109,7 +112,7 @@ export default function TweetFeed() {
 
   const handleLike = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/tweets/${id}/like`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tweets/${id}/like`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('store_token')}`,
@@ -125,7 +128,7 @@ export default function TweetFeed() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/tweets/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tweets/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('store_token')}`,
@@ -143,7 +146,7 @@ export default function TweetFeed() {
     if (!newTweetContent.trim()) return;
     
     try {
-      const response = await fetch('http://localhost:8080/api/v1/tweets', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tweets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

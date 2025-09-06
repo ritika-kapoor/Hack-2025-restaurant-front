@@ -4,6 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 
 import Link from "next/link";
 import axios from "axios";
+
+// API Base URL configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -237,7 +240,7 @@ const StoreHomePage = () => {
   const fetchNewsViewCounts = useCallback(async (articles: NewsArticle[]) => {
     try {
       const newsIDs = articles.map(article => article.id);
-      const response = await axios.post("http://localhost:8080/api/v1/news/view-counts", {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/news/view-counts`, {
         news_ids: newsIDs
       });
       
@@ -262,7 +265,7 @@ const StoreHomePage = () => {
     try {
       setConsultingNews(article.id);
       
-      const response = await fetch("http://localhost:8080/api/v1/news/consult", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/news/consult`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -304,7 +307,7 @@ const StoreHomePage = () => {
         return;
       }
 
-      await axios.post("http://localhost:8080/api/v1/news/view", {
+      await axios.post(`${API_BASE_URL}/api/v1/news/view`, {
         news_url: article.link,
         news_title: article.title,
         news_id: article.id
@@ -316,7 +319,7 @@ const StoreHomePage = () => {
       });
 
       // 閲覧記録後、その記事の閲覧数を更新
-      const response = await axios.get(`http://localhost:8080/api/v1/news/view-count/${article.id}`);
+      const response = await axios.get(`${API_BASE_URL}/api/v1/news/view-count/${article.id}`);
       const newViewCount = response.data.view_count || 0;
       
       // 状態を更新して閲覧数を反映
@@ -341,7 +344,7 @@ const StoreHomePage = () => {
         const token = localStorage.getItem('store_token');
         
         if (token) {
-          const response = await axios.get("http://localhost:8080/api/v1/stores/profile", {
+          const response = await axios.get(`${API_BASE_URL}/api/v1/stores/profile`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
@@ -377,7 +380,7 @@ const StoreHomePage = () => {
 
       // 実際のAPIを呼び出し
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/flyer/nearby?city=${encodeURIComponent(currentUserCity)}&limit=3`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/flyer/nearby?city=${encodeURIComponent(currentUserCity)}&limit=3`);
         if (response.ok) {
           const result = await response.json();
           console.log('Nearby flyers API response:', result);

@@ -9,7 +9,8 @@ interface Store {
 }
 
 async function getStores(): Promise<Store[]> {
-  const res = await fetch('http://localhost:8080/api/v1/stores', { cache: 'no-store' });
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+  const res = await fetch(`${apiBaseUrl}/api/v1/stores`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch stores');
   }
