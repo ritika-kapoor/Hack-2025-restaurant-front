@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { Store, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,7 +29,6 @@ export default function StoreLogin() {
     resolver: zodResolver(loginSchema),
   });
 
-  const router = useRouter();
   const { login } = useAuth();
   const [error, setError] = useState("");
 
@@ -47,12 +45,50 @@ export default function StoreLogin() {
         console.warn("store_id not found in login response, will be set later");
       }
       
+      console.log("About to call login() with token and store_id");
       login(token, store_id);
       
-      router.push("/store/");
-    } catch (error) {
-      setError("ログインに失敗しました");
-      console.error(error);
+      console.log("login() called, forcing page reload to /store");
+      
+      // より確実な遷移のため、ページ全体をリロード
+      window.location.href = "/store";
+    } catch (err: unknown) {
+      const axiosError = err as { 
+        response?: { 
+          status?: number; 
+          statusText?: string; 
+          data?: { error?: string; message?: string } 
+        };
+        message?: string;
+      };
+      
+      console.error("ログインエラー詳細:", {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        response: axiosError?.response,
+        status: axiosError?.response?.status,
+        data: axiosError?.response?.data,
+      });
+      
+      // ユーザーフレンドリーなエラーメッセージを表示
+      const status = axiosError.response?.status;
+      
+      if (status === 400) {
+        setError("メールアドレスまたはパスワードが正しくありません。");
+      } else if (status === 401) {
+        setError("メールアドレスまたはパスワードが間違っています。");
+      } else if (status === 404) {
+        setError("アカウントが見つかりません。新規登録を行ってください。");
+      } else if (status === 422) {
+        setError("入力内容に問題があります。メールアドレスとパスワードを確認してください。");
+      } else if (status === 500) {
+        setError("サーバーで問題が発生しました。しばらく時間をおいてから再度お試しください。");
+      } else if (status && status >= 400) {
+        setError("ログイン処理でエラーが発生しました。入力内容を確認してください。");
+      } else if (axiosError.message?.includes('Network Error') || axiosError.message?.includes('timeout')) {
+        setError("インターネット接続を確認してください。ネットワークエラーが発生しています。");
+      } else {
+        setError("ログインに失敗しました。しばらく時間をおいてから再度お試しください。");
+      }
     }
   };
 

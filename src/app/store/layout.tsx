@@ -16,11 +16,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isPublicPath = publicPaths.includes(pathname);
 
   useEffect(() => {
+    console.log('Store Layout Auth Check:', {
+      pathname,
+      isLoading,
+      isAuthenticated,
+      isPublicPath,
+      token: typeof window !== 'undefined' ? localStorage.getItem('store_token') : null
+    });
+    
     // 認証チェックが完了し、未認証で、かつ認証が必要なページの場合はログイン画面へリダイレクト
     if (!isLoading && !isAuthenticated && !isPublicPath) {
+      console.log('Redirecting to /login due to authentication failure');
       router.push("/login");
     }
-  }, [isAuthenticated, isLoading, isPublicPath, router]);
+  }, [isAuthenticated, isLoading, isPublicPath, router, pathname]);
 
   // 認証チェック中はローディング画面を表示（認証不要ページを除く）
   if (isLoading && !isPublicPath) {

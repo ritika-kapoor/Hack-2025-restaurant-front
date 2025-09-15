@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Store, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
 
 const registerSchema = z.object({
   email: z.string().email("有効なメールアドレスを入力してください"),
@@ -29,7 +28,6 @@ export default function StoreRegister() {
     resolver: zodResolver(registerSchema),
   });
 
-  const router = useRouter();
   const { login } = useAuth();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +61,13 @@ export default function StoreRegister() {
         console.log("トークンが見つかりました:", token);
         
         // useAuthフックを使用してログイン状態にする（ログインと同じ方法）
+        console.log("About to call login() with token");
         login(token);
         
-        console.log("ログイン状態を設定しました");
+        console.log("login() called, forcing page reload to /store");
         
-        // ルーターを使ってリダイレクト（ログインと同じ方法）
-        router.push("/store/");
+        // より確実な遷移のため、ページ全体をリロード
+        window.location.href = "/store";
       } else {
         console.log("トークンが見つかりません");
         console.log("response.data:", response.data);
@@ -91,17 +90,23 @@ export default function StoreRegister() {
         data: axiosError?.response?.data,
       });
       
-      // サーバーからのエラーメッセージを優先的に表示
-      if (axiosError.response?.data?.error) {
-        setError(axiosError.response.data.error);
-      } else if (axiosError.response?.data?.message) {
-        setError(axiosError.response.data.message);
-      } else if (axiosError.response?.status) {
-        setError(`リクエストエラー (${axiosError.response.status}): ${axiosError.response.statusText || '不明なエラー'}`);
-      } else if (axiosError.message) {
-        setError(`ネットワークエラー: ${axiosError.message}`);
+      // ユーザーフレンドリーなエラーメッセージを表示
+      const status = axiosError.response?.status;
+      
+      if (status === 400) {
+        setError("入力情報に不備があります。メールアドレスとパスワードを確認してください。");
+      } else if (status === 409) {
+        setError("このメールアドレスは既に登録されています。ログイン画面からログインしてください。");
+      } else if (status === 422) {
+        setError("入力内容に問題があります。メールアドレスの形式やパスワードの長さを確認してください。");
+      } else if (status === 500) {
+        setError("サーバーで問題が発生しました。しばらく時間をおいてから再度お試しください。");
+      } else if (status && status >= 400) {
+        setError("登録処理でエラーが発生しました。入力内容を確認してください。");
+      } else if (axiosError.message?.includes('Network Error') || axiosError.message?.includes('timeout')) {
+        setError("インターネット接続を確認してください。ネットワークエラーが発生しています。");
       } else {
-        setError("登録に失敗しました");
+        setError("新規登録に失敗しました。しばらく時間をおいてから再度お試しください。");
       }
     } finally {
       setIsLoading(false);
